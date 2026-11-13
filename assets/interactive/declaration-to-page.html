@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>From Declaration to Page · Libertas</title>
+<meta name="description" content="One protocol declaration in Rust or TypeScript: a page for people, a tool call for AI and typed SDK calls for other programs, all sending the same Avro bytes to unchanged App code.">
+<style>
+/* Layout: App code (left) and client GUI (right) are equal-height panes; the data in transit sits compact in the middle between them. Stacks on narrow screens. */
+/* signal-tokens: the one Signal token set; interactive pages carry this exact block. */
+:root {
+  --bg: #f5f8f7; --surface: #ffffff; --wash: #ecf2ef; --code-bg: #f1f5f3;
+  --ink: #14201d; --muted: #4b5f5a; --line: #d3ded9; --line-strong: #a9bab4;
+  --brand: #0b6b5c; --brand-strong: #07574a; --on-brand: #ffffff; --brand-tint: #e1f1ec;
+  --app: #6639c9; --on-app: #ffffff; --app-tint: #efe9fc;
+  --data: #d98a00; --data-ink: #8f4f00; --on-data: #1c1300; --data-tint: #fff1d9;
+  --frame: #1a2623; --screen: #ffffff; --shadow: 0 1px 2px #14201d0f, 0 8px 24px #14201d0d;
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --step--1: .875rem; --step-0: 1rem; --step-1: 1.25rem; --step-2: 1.5625rem; --step-3: 1.953rem; --step-4: 2.441rem; --step-5: 3.052rem;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1412; --surface: #131d1a; --wash: #192521; --code-bg: #0f1816;
+    --ink: #e3ece8; --muted: #9eb2ac; --line: #263430; --line-strong: #3d504a;
+    --brand: #4cc6ae; --brand-strong: #7ad8c5; --on-brand: #05201a; --brand-tint: #11302a;
+    --app: #b8a0ff; --on-app: #160e2c; --app-tint: #231d3b;
+    --data: #ffb444; --data-ink: #ffc56e; --on-data: #1c1300; --data-tint: #30240e;
+    --frame: #030706; --screen: #101917; --shadow: 0 1px 2px #0006, 0 8px 24px #0004;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1412; --surface: #131d1a; --wash: #192521; --code-bg: #0f1816;
+  --ink: #e3ece8; --muted: #9eb2ac; --line: #263430; --line-strong: #3d504a;
+  --brand: #4cc6ae; --brand-strong: #7ad8c5; --on-brand: #05201a; --brand-tint: #11302a;
+  --app: #b8a0ff; --on-app: #160e2c; --app-tint: #231d3b;
+  --data: #ffb444; --data-ink: #ffc56e; --on-data: #1c1300; --data-tint: #30240e;
+  --frame: #030706; --screen: #101917; --shadow: 0 1px 2px #0006, 0 8px 24px #0004;
+  color-scheme: dark;
+}
+/* signal-tokens:end */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font); }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+h1 { margin: 0; font-weight: 800; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -0.02em; line-height: 1.05; text-wrap: balance; }
+.lede { margin: 14px 0 0; display: grid; gap: 4px; max-width: 58ch; font-size: clamp(1.3rem, 2.6vw, 1.85rem); line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance; }
+.lede strong { font-weight: 700; color: var(--ink); }
+.lede span { font-weight: 500; color: var(--muted); }
+.lede .nw { margin-top: 10px; }
+.say { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; font-size: 1.08rem; font-weight: 600; min-height: 3.4em; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px 12px; align-items: center; }
+#say { display: grid; flex: 1; min-width: 0; }
+#say > span { grid-area: 1 / 1; visibility: hidden; align-self: center; }
+#say > span.on { visibility: visible; }
+.say .num { font: 800 .9rem var(--font); color: var(--on-brand); background: var(--brand); border-radius: 999px; min-width: 2em; height: 2em; display: grid; place-items: center; flex: none; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .78fr) minmax(0, 1.2fr); gap: 14px; align-items: stretch; }
+@media (max-width: 920px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.col { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; transition: box-shadow .3s, border-color .3s; }
+.col.hot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--hl) 45%, transparent); border-color: var(--hl); }
+.col h2 { margin: 0; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--hl); }
+.col .who { font-size: .82rem; color: var(--muted); margin-top: -6px; }
+.c-app { --hl: var(--app); } .c-data { --hl: var(--data); } .c-data h2 { color: var(--data-ink); }
+.mid { display: flex; flex-direction: column; gap: 12px; align-self: stretch; min-width: 0; }
+.mid .c-data { margin-block: auto; } .c-client { --hl: var(--brand); }
+.langs { display: flex; gap: 6px; }
+.lang { font: 600 .78rem var(--font); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+.lang[aria-pressed="true"] { background: var(--app); border-color: var(--app); color: var(--on-app); }
+pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 12.5px/1.5 var(--mono); overflow-x: auto; flex: 1; }
+.cm { color: var(--muted); } .kw { color: var(--app); font-weight: 500; } .ty { color: var(--brand); } .at { color: var(--data-ink); }
+.cur { background: color-mix(in srgb, var(--data) 20%, transparent); border-radius: 4px; outline: 1px solid color-mix(in srgb, var(--data) 55%, transparent); }
+.noschema { font-size: .8rem; color: var(--muted); }
+
+/* data pane */
+.msg { border: 1.5px solid var(--data); background: var(--data-tint); border-radius: 10px; padding: 8px 10px; font: 12.5px/1.45 var(--mono); white-space: pre; overflow-x: auto; }
+.msg .lbl { font: 800 .7rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; white-space: normal; }
+.bytes { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.byte { font: 500 .9rem var(--mono); background: var(--surface); border: 1px solid var(--data); color: var(--ink); border-radius: 6px; padding: 3px 6px; opacity: 0; transform: translateY(5px); transition: opacity .25s, transform .25s; }
+.byte.on { opacity: 1; transform: none; }
+.byte.v { background: var(--data); color: var(--on-data); }
+.legend { font-size: .76rem; color: var(--muted); display: grid; gap: 2px; }
+.legend code { font-family: var(--mono); color: var(--ink); }
+.dir { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; }
+.end { font: 800 .74rem var(--font); border-radius: 999px; padding: 4px 10px; border: 1.5px solid; }
+.end.app { border-color: var(--app); color: var(--app); } .end.cli { border-color: var(--brand); color: var(--brand); }
+.seg { position: relative; height: 3px; background: var(--line); border-radius: 2px; }
+.seg.live { background: var(--data); }
+.seg.live::after { content: ""; position: absolute; top: 50%; transform: translateY(-50%); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+.dir.toc .seg.live::after { right: -3px; border-left: 10px solid var(--data); }
+.dir.toa .seg.live::after { left: -3px; border-right: 10px solid var(--data); }
+.pkt { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--data); transform: translate(-50%, -50%); }
+.idle { font-size: .82rem; color: var(--muted); text-align: center; }
+.jump { display: grid; justify-items: center; gap: 4px; padding-block: 4px; }
+.jump .box { width: 100%; text-align: center; border-radius: 12px; padding: 8px 10px; font: 800 1rem var(--mono); }
+.jump .from { border: 2px solid var(--data); background: var(--data-tint); }
+.jump .to { border: 2.5px solid var(--brand); background: var(--brand-tint); font-size: 1.05rem; }
+.jump .down { display: flex; align-items: center; gap: 10px; color: var(--brand); }
+.jump .down svg { display: block; }
+.jump .verb { font: 800 1.05rem var(--font); }
+.jump .term { font: 500 .66rem var(--mono); color: var(--muted); text-align: center; }
+.jump.play .from { animation: jfrom .5s ease-out both; }
+.jump.play .down { animation: jdown .6s .35s ease-out both; }
+.jump.play .to { animation: jto .6s .8s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes jfrom { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes jdown { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes jto { from { opacity: 0; transform: scale(.7); box-shadow: 0 0 0 0 var(--brand); } 60% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--brand) 25%, transparent); } }
+
+/* client pane */
+.schema { background: var(--brand-tint); border-radius: 10px; padding: 8px 10px; font: 12px/1.5 var(--mono); }
+.schema .t { font: 800 .7rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+.schema .f { display: flex; justify-content: space-between; gap: 8px; }
+.schema .f span:last-child { color: var(--muted); text-align: right; }
+.gui { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; position: relative; }
+.gui .tt { font-weight: 800; font-size: 1.02rem; }
+.gui .lb { font-size: .82rem; color: var(--muted); }
+.opt { border: 1.5px solid var(--line); border-radius: 10px; padding: 7px 10px; font-size: .9rem; display: flex; gap: 8px; align-items: center; }
+.opt::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
+.opt.sel { border-color: var(--brand); background: var(--brand-tint); }
+.opt.sel::before { background: var(--brand); border-color: var(--brand); }
+.inp { border: 1.5px solid var(--line); border-radius: 10px; padding: 7px 10px; font: 500 .9rem var(--mono); min-height: 36px; }
+.gbtn { margin-top: auto; border: 0; border-radius: 12px; padding: 10px; font: 800 .92rem var(--font); background: var(--brand); color: var(--on-brand); text-align: center; }
+.gbtn.off { opacity: .35; }
+.drawn { position: absolute; top: 10px; right: 10px; font: 800 .68rem var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--brand); background: var(--brand-tint); border-radius: 999px; padding: 2px 8px; }
+.empty { color: var(--muted); font-size: .88rem; margin: auto; text-align: center; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tab { font: 700 .85rem var(--font); border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); padding: 6px 10px; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); }
+.tab:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.panel { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+.panel .lbl { font: 800 .7rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.panel pre { flex: none; font-size: 11.5px; max-height: 300px; overflow: auto; }
+.panel .bytes .byte { opacity: 1; transform: none; }
+.same { font-size: .76rem; color: var(--ink); font-weight: 600; }
+.senders { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.sender { font: 700 .72rem var(--font); border: 1.5px solid var(--brand); color: var(--brand); background: var(--surface); border-radius: 999px; padding: 2px 9px; cursor: pointer; }
+.sender:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; }
+@media (max-width: 920px) { .say .bar { grid-column: 1 / -1; justify-content: flex-start; } }
+.btn { font: 800 .9rem var(--font); border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 12px; padding: 8px 14px; cursor: pointer; }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.btn:focus-visible, .dot:focus-visible, .lang:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.dots { display: flex; gap: 6px; flex-wrap: wrap; }
+.dot { width: 30px; height: 8px; border-radius: 4px; border: 0; padding: 0; background: var(--line); cursor: pointer; }
+.dot.done { background: color-mix(in srgb, var(--brand) 40%, var(--line)); }
+.dot.now { background: var(--brand); }
+.foot { font-size: .8rem; color: var(--muted); margin: 0; }
+.back { font-size: .85rem; font-weight: 600; color: var(--brand); text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.back:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.cap { font-size: .76rem; color: var(--muted); margin: 0; }
+.nojs { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+a { color: var(--brand); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="main">
+  <a class="back" href="../../concepts/declaration-to-page.html">← From declaration to page: the explanation</a>
+  <header>
+    <h1>From Declaration to Page</h1>
+    <p class="lede"><strong>One Union type.</strong><span>Every interaction, such as requests and replies, in one place.</span><strong class="nw">Declare it once.</strong><span>People get a page. AI gets a tool. Programs get a library.</span><strong class="nw">Not the Web.</strong><span>The full web experience with native UI, from a few bytes of data.</span></p>
+  </header>
+
+  <noscript><p class="nojs">This step-through needs JavaScript. The <a href="../../concepts/declaration-to-page.html">explanation page</a> shows the same declarations, bytes and pages without it.</p></noscript>
+
+  <div class="say">
+    <span class="num" id="num">1</span><span id="say" aria-live="polite"></span>
+    <div class="bar">
+      <button class="btn" id="first" type="button" aria-label="Start over" title="Start over">⏮</button>
+      <button class="btn primary" id="play" type="button">▶ Play</button>
+      <button class="btn" id="prev" type="button" aria-label="Previous step" title="Previous step">‹</button>
+      <button class="btn" id="next" type="button" aria-label="Next step" title="Next step">›</button>
+      <div class="dots" id="dots" role="group" aria-label="Steps"></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <section class="col c-app" id="col-app">
+      <h2>The App</h2>
+      <div class="who">The developer's code: one Union type holds every interaction</div>
+      <div class="langs" role="group" aria-label="Language">
+        <button class="lang" id="lang-rust" type="button" aria-pressed="true">Rust</button>
+        <button class="lang" id="lang-ts" type="button" aria-pressed="false">TypeScript</button>
+      </div>
+      <pre id="code" tabindex="0" aria-label="The App's protocol declaration"></pre>
+      <div class="noschema">The App never reads a schema. Generated code encodes and decodes its values, whoever sent them.</div>
+    </section>
+
+    <div class="mid">
+        <div class="jump" id="jump" hidden role="img" aria-label="Started opens SaveFilingStatus through WorkflowRequest">
+          <div class="box from">Started</div>
+          <div class="down"><svg width="34" height="46" viewBox="0 0 34 46" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3v36M5 27l12 14 12-14"/></svg><span class="verb">opens</span></div>
+          <div class="box to">SaveFilingStatus</div>
+          <div class="term">WorkflowRequest</div>
+        </div>
+    <section class="col c-data" id="col-data">
+      <h2>The data</h2>
+      <div class="who">What crosses between them</div>
+      <div class="msg" id="native"></div>
+      <div class="bytes" id="bytes" role="group" aria-label="Encoded bytes, hexadecimal"></div>
+      <div class="legend" id="legend"></div>
+      <div class="dir" id="dir" aria-hidden="true"><span class="end app">App</span><span class="seg" id="seg"></span><span class="end cli">Client</span></div>
+      <div class="idle" id="dirnote"></div>
+    </section>
+    </div>
+
+    <section class="col c-client" id="col-client">
+      <h2>Who uses it</h2>
+      <div class="tabs" role="tablist" aria-label="Consumer">
+        <button class="tab" id="tab-people" type="button" role="tab" aria-selected="true" aria-controls="panel-people">People</button>
+        <button class="tab" id="tab-ai" type="button" role="tab" aria-selected="false" aria-controls="panel-ai" tabindex="-1">AI</button>
+        <button class="tab" id="tab-programs" type="button" role="tab" aria-selected="false" aria-controls="panel-programs" tabindex="-1">Programs</button>
+      </div>
+      <div class="panel" id="panel-people" role="tabpanel" aria-labelledby="tab-people">
+        <div class="who">The client has the schema, so it understands and draws</div>
+        <div class="schema" id="schema"></div>
+        <div class="gui" id="gui" role="group" aria-label="Client page drawn from the schema"></div>
+        <p class="cap">A conceptual drawing of the page, not a product screenshot. Each client lays out the same schema in its own native controls.</p>
+      </div>
+      <div class="panel" id="panel-ai" role="tabpanel" aria-labelledby="tab-ai" hidden>
+        <div class="who">The Hub turns each request into a tool, named and described by the declaration and its comments</div>
+        <span class="lbl" id="ai-tool-lbl"></span>
+        <pre id="ai-tool" tabindex="0" aria-labelledby="ai-tool-lbl"></pre>
+        <span class="lbl" id="ai-args-lbl">The AI calls it with</span>
+        <pre id="ai-args" tabindex="0" aria-labelledby="ai-args-lbl"></pre>
+        <span class="lbl">The Hub encodes</span>
+        <div class="bytes" id="ai-bytes" role="group" aria-label="Bytes the Hub encodes, hexadecimal"></div>
+        <p class="cap">Generated from the Rust declaration, shown abridged; the explanation page has it in full. A <code>null</code> for a field that is not Nullable cannot be encoded, and the Hub rejects the call.</p>
+      </div>
+      <div class="panel" id="panel-programs" role="tabpanel" aria-labelledby="tab-programs" hidden>
+        <div class="who">Another App uses the same declared types and the SDK</div>
+        <span class="lbl" id="prog-lbl"></span>
+        <pre id="prog" tabindex="0" aria-labelledby="prog-lbl"></pre>
+        <span class="lbl">The SDK encodes</span>
+        <div class="bytes" id="prog-bytes" role="group" aria-label="Bytes the SDK encodes, hexadecimal"></div>
+        <p class="cap"><code>interview</code> is the other App's Endpoint for this protocol, connected to this App when its task is configured.</p>
+      </div>
+    </section>
+  </div>
+
+  <p class="foot">Keyboard: ← and → change steps, Space plays or pauses, Home starts over.</p>
+  <p class="foot">The bytes are the exact Avro encoding of each value, as the Rust SDK produces it: the variant index first, then the fields in order. A TypeScript App sends the same bytes; its <code>kind</code> field is the variant index, written once. A tool call and an SDK request carry the same value. Only the value is shown, not the transport that carries it.</p>
+</main>
+
+<script>
+(() => {
+  // ---- The App's protocol, in both languages. Each variant has an id so the current message can be highlighted.
+  const CODE = {
+    rust: `<span class="cm">/// Filing status</span>
+<span class="kw">#[derive</span>(LibertasExport, LibertasAvroDecode, LibertasAvroEncode)<span class="kw">]</span>
+<span class="kw">pub enum</span> <span class="ty">FilingStatus</span> {
+    <span class="cm">/// Single</span>
+    Single,
+    <span class="cm">/// Married filing jointly</span>
+    MarriedJointly {
+        <span class="cm">/// Spouse's first name</span>
+        spouse: <span class="ty">String</span>,
+    },
+    <span class="cm">/// Head of household</span>
+    HeadOfHousehold,
+}
+
+<span class="cm">/// Tax interview</span>
+<span class="kw">#[derive</span>(LibertasExport, LibertasAvroDecode, LibertasAvroEncode)<span class="kw">]</span>
+<span class="kw">pub enum</span> <span class="ty">TaxInterviewProtocol</span> {
+<span id="v-start">    <span class="cm">/// Start my return</span>
+    <span class="at">#[libertas_request]</span>
+    Start,</span>
+<span id="v-started">    <span class="cm">/// Your interview has started</span>
+    <span class="at">#[libertas_response]</span>
+    <span class="at">#[libertas_workflow_request("SaveFilingStatus")]</span>
+    Started,</span>
+<span id="v-save">    <span class="cm">/// Your filing status</span>
+    <span class="at">#[libertas_request]</span>
+    SaveFilingStatus {
+        <span class="cm">/// What is your filing status?</span>
+        status: <span class="ty">FilingStatus</span>,
+    },</span>
+<span id="v-saved">    <span class="cm">/// Saved</span>
+    <span class="at">#[libertas_response]</span>
+    Saved {
+        <span class="cm">/// Message</span>
+        message: <span class="ty">String</span>,
+    },</span>
+}`,
+    ts: `<span class="kw">export enum</span> <span class="ty">FilingStatusKind</span> { Single, MarriedJointly, HeadOfHousehold }
+<span class="cm">/** Single */</span>
+<span class="kw">export interface</span> <span class="ty">Single</span> { kind: FilingStatusKind.Single; }
+<span class="cm">/** Married filing jointly */</span>
+<span class="kw">export interface</span> <span class="ty">MarriedJointly</span> {
+  kind: FilingStatusKind.MarriedJointly;
+  <span class="cm">/** Spouse's first name */</span>
+  spouse: <span class="ty">string</span>;
+}
+<span class="cm">/** Head of household */</span>
+<span class="kw">export interface</span> <span class="ty">HeadOfHousehold</span> { kind: FilingStatusKind.HeadOfHousehold; }
+<span class="cm">/** Filing status */</span>
+<span class="kw">export type</span> <span class="ty">FilingStatus</span> = Single | MarriedJointly | HeadOfHousehold;
+
+<span class="kw">export enum</span> <span class="ty">Step</span> { Start, Started, SaveFilingStatus, Saved }
+<span id="v-start"><span class="cm">/** Start my return
+ * <span class="at">@LibertasRequest</span> */</span>
+<span class="kw">export interface</span> <span class="ty">Start</span> { kind: Step.Start; }</span>
+<span id="v-started"><span class="cm">/** Your interview has started
+ * <span class="at">@LibertasResponse</span>
+ * <span class="at">@LibertasWorkflowRequest("SaveFilingStatus")</span> */</span>
+<span class="kw">export interface</span> <span class="ty">Started</span> { kind: Step.Started; }</span>
+<span id="v-save"><span class="cm">/** Your filing status
+ * <span class="at">@LibertasRequest</span> */</span>
+<span class="kw">export interface</span> <span class="ty">SaveFilingStatus</span> {
+  kind: Step.SaveFilingStatus;
+  <span class="cm">/** What is your filing status? */</span>
+  status: <span class="ty">FilingStatus</span>;
+}</span>
+<span id="v-saved"><span class="cm">/** Saved
+ * <span class="at">@LibertasResponse</span> */</span>
+<span class="kw">export interface</span> <span class="ty">Saved</span> {
+  kind: Step.Saved;
+  <span class="cm">/** Message */</span>
+  message: <span class="ty">string</span>;
+}</span>
+<span class="cm">/** Tax interview */</span>
+<span class="kw">export type</span> <span class="ty">TaxInterviewProtocol</span> = Start | Started | SaveFilingStatus | Saved;`,
+  };
+
+  const NATIVE = {
+    start:   { rust: "TaxInterviewProtocol::Start", ts: "{ kind: Step.Start }" },
+    started: { rust: "TaxInterviewProtocol::Started", ts: "{ kind: Step.Started }" },
+    save:    { rust: "TaxInterviewProtocol::SaveFilingStatus {\n  status: FilingStatus::MarriedJointly {\n    spouse: \"Alex\",\n  },\n}", ts: "{\n  kind: Step.SaveFilingStatus,\n  status: {\n    kind: FilingStatusKind.MarriedJointly,\n    spouse: \"Alex\",\n  },\n}" },
+    saved:   { rust: "TaxInterviewProtocol::Saved {\n  message: \"Saved\",\n}", ts: "{\n  kind: Step.Saved,\n  message: \"Saved\",\n}" },
+  };
+  const BYTES = {
+    start:   [["00", "variant 0 → Start", true]],
+    started: [["02", "variant 1 → Started", true]],
+    save:    [["04", "variant 2 → SaveFilingStatus", true], ["02", "status: variant 1 → MarriedJointly", true], ["08", "spouse: string length 4"], ["41", "A"], ["6C", "l"], ["65", "e"], ["78", "x"]],
+    saved:   [["06", "variant 3 → Saved", true], ["0A", "message: string length 5"], ["53", "S"], ["61", "a"], ["76", "v"], ["65", "e"], ["64", "d"]],
+  };
+  const SCHEMA = {
+    none: `<span class="t">Schema on the client</span><div class="f"><span>TaxInterviewProtocol</span><span>Start · Started · SaveFilingStatus · Saved</span></div>`,
+    save: `<span class="t">Schema used to draw this editor</span>
+<div class="f"><span>SaveFilingStatus</span><span>request</span></div>
+<div class="f"><span>&nbsp;└ status</span><span>FilingStatus, one of:</span></div>
+<div class="f"><span>&nbsp;&nbsp;&nbsp;&nbsp;├ Single</span><span></span></div>
+<div class="f"><span>&nbsp;&nbsp;&nbsp;&nbsp;├ MarriedJointly</span><span>spouse: String</span></div>
+<div class="f"><span>&nbsp;&nbsp;&nbsp;&nbsp;└ HeadOfHousehold</span><span></span></div>`,
+    saved: `<span class="t">Schema used to show this reply</span>
+<div class="f"><span>Saved</span><span>response</span></div>
+<div class="f"><span>&nbsp;└ message</span><span>String</span></div>`,
+  };
+  const editor = (sel, spouse, drawn) => `${drawn ? `<span class="drawn">drawn from schema</span>` : ""}
+    <div class="tt">Your filing status</div>
+    <div class="lb">What is your filing status?</div>
+    <div class="opt ${sel === 0 ? "sel" : ""}">Single</div>
+    <div class="opt ${sel === 1 ? "sel" : ""}">Married filing jointly</div>
+    ${sel === 1 ? `<div style="margin-left:22px;display:grid;gap:4px"><div class="lb">Spouse's first name</div><div class="inp">${spouse || "&nbsp;"}</div></div>` : ""}
+    <div class="opt ${sel === 2 ? "sel" : ""}">Head of household</div>
+    <div class="gbtn ${sel == null || (sel === 1 && !spouse) ? "off" : ""}">Next</div>`;
+  const START = `<span class="drawn">drawn from schema</span><div class="tt">Tax interview</div><div class="lb">Actions</div><div class="gbtn">Start my return</div>`;
+  const DONE = `<span class="drawn">drawn from schema</span><div class="tt">Saved</div><div class="lb">Message</div><div class="inp">Saved</div>`;
+
+  // ---- The same requests from an AI and from another program.
+  // Tool definitions follow the Hub's generator: the variant name, its comment as the description,
+  // its fields as parameters, and a named Union as an externally tagged oneOf in definitions.
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const AI = {
+    start: {
+      tool: `{
+  "name": "Start",
+  "parameters": { "type": "object", "properties": {}, "required": [] },
+  "description": "Start my return"
+}`,
+      args: `{}` },
+    save: {
+      tool: `{
+  "name": "SaveFilingStatus",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "$ref": "#/definitions/FilingStatus",
+        "title": "What is your filing status?",
+        "description": "What is your filing status?"
+      }
+    },
+    "required": ["status"],
+    "definitions": {
+      "FilingStatus": {
+        "oneOf": [
+          { "type": "object", "properties": { "Single": { "type": "null", … } }, … },
+          { "type": "object", "properties": { "MarriedJointly": {
+              "type": "object",
+              "properties": { "spouse": { "type": "string",
+                "title": "Spouse's first name", … } },
+              "required": ["spouse"], … } }, … },
+          { "type": "object", "properties": { "HeadOfHousehold": { "type": "null", … } }, … }
+        ],
+        "title": "Filing status", …
+      }
+    }
+  },
+  "description": "Your filing status"
+}`,
+      args: `{ "status": { "MarriedJointly": { "spouse": "Alex" } } }` },
+  };
+  const PROGRAM = {
+    start: {
+      rust: `use libertas::libertas_endpoint_request;
+use tax_interview::TaxInterviewProtocol;
+
+libertas_endpoint_request(interview, &TaxInterviewProtocol::Start);`,
+      ts: `import { EndpointAction } from "@libertas-ai/consts";
+import { Step } from "tax-interview";
+
+libertasEndpointSendRequest(interview, EndpointAction.Request,
+  { kind: Step.Start });` },
+    save: {
+      rust: `use libertas::libertas_endpoint_request;
+use tax_interview::{FilingStatus, TaxInterviewProtocol};
+
+let request = TaxInterviewProtocol::SaveFilingStatus {
+    status: FilingStatus::MarriedJointly { spouse: "Alex".into() },
+};
+libertas_endpoint_request(interview, &request);`,
+      ts: `import { EndpointAction } from "@libertas-ai/consts";
+import { FilingStatusKind, Step } from "tax-interview";
+
+libertasEndpointSendRequest(interview, EndpointAction.Request, {
+  kind: Step.SaveFilingStatus,
+  status: { kind: FilingStatusKind.MarriedJointly, spouse: "Alex" },
+});` },
+  };
+  let tab = "people";
+
+  // ---- Story
+  const STEPS = [
+    { hot: "app", cur: null, say: "The App declares its protocol as one Union type. Comments become the words people see and the tool descriptions an AI reads; attributes say which messages are requests and which are replies.", schema: "none", gui: START },
+    { hot: "app", cur: "start", msg: "start", dir: "toa", decoded: true, say: "The person taps Start. The client sends a one-byte Start request, and the App receives a native TaxInterviewProtocol::Start value. It never looks at bytes or a schema.", schema: "none", gui: START },
+    { hot: "client", cur: "started", msg: "started", dir: "toc", decoded: true, say: "The App answers Started: one byte. Started opens SaveFilingStatus, and the client draws the whole page from the schema it already has. No HTML, no script.", schema: "save", gui: editor(null, "", true) },
+    { hot: "client", cur: "save", say: "The person picks Married filing jointly. The schema says that choice carries a spouse, so the client shows the spouse field right under it.", schema: "save", gui: editor(1, "", true) },
+    { hot: "client", cur: "save", say: "The person types Alex. Everything stays in the client until Next.", schema: "save", gui: editor(1, "Alex", true) },
+    { hot: "app", cur: "save", msg: "save", dir: "toa", decoded: true, say: "On Next, the client sends SaveFilingStatus as seven bytes. An AI's tool call or another program sends the same seven; the App decodes them and gets the spouse.", schema: "save", gui: editor(1, "Alex", true) },
+    { hot: "client", cur: "saved", msg: "saved", dir: "toc", decoded: true, say: "The App replies Saved. The client decodes it with the schema and shows it. The whole interview took 16 bytes of data.", schema: "saved", gui: DONE },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let lang = "rust", i = 0, playing = false, timer = null, timers = [], raf = null;
+
+  function direction(dir) {
+    const box = $("dir"), seg = $("seg");
+    box.classList.remove("toc", "toa"); seg.classList.remove("live"); seg.innerHTML = "";
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    if (!dir) { $("dirnote").textContent = "Nothing crossing right now"; return; }
+    box.classList.add(dir); seg.classList.add("live");
+    $("dirnote").textContent = dir === "toc" ? "App → Client" : "Client → App";
+    if (reduce) return;
+    const dot = document.createElement("span"); dot.className = "pkt"; seg.appendChild(dot);
+    const t0 = performance.now(), dur = 1300;
+    const step = (t) => { const p = ((t - t0) % dur) / dur; dot.style.left = (dir === "toc" ? p : 1 - p) * 100 + "%"; raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+  }
+
+  function render(animate) {
+    const s = STEPS[i];
+    $("num").textContent = String(i + 1);
+    // Every step's sentence sits in the same grid cell, so the box always has the height of the longest one.
+    const sayBox = $("say");
+    if (sayBox.childElementCount !== STEPS.length) {
+      sayBox.innerHTML = "";
+      STEPS.forEach((st) => { const t = document.createElement("span"); t.textContent = st.say; sayBox.appendChild(t); });
+    }
+    [...sayBox.children].forEach((t, k) => { t.classList.toggle("on", k === i); t.setAttribute("aria-hidden", String(k !== i)); });
+    ["app", "data", "client"].forEach((c) => $("col-" + c).classList.toggle("hot", s.hot === c || (c === "data" && !!s.msg)));
+    $("code").innerHTML = CODE[lang];
+    if (s.cur) { const n = document.getElementById("v-" + s.cur); if (n) n.classList.add("cur"); }
+    // data
+    timers.forEach(clearTimeout); timers = [];
+    const nat = $("native"), bytes = $("bytes"), legend = $("legend");
+    bytes.innerHTML = ""; legend.innerHTML = "";
+    if (s.msg) {
+      const fromApp = s.dir === "toc";
+      nat.hidden = false;
+      nat.innerHTML = `<span class="lbl">${s.decoded ? (fromApp ? "Client reads" : "App receives") : (fromApp ? "App sends" : "Client sends")}</span>`;
+      nat.appendChild(document.createTextNode(NATIVE[s.msg][lang]));
+      BYTES[s.msg].forEach(([b, m, v], k) => {
+        const d = document.createElement("span"); d.className = "byte" + (v ? " v" : ""); d.textContent = b; d.title = m; bytes.appendChild(d);
+        const on = () => d.classList.add("on");
+        if (animate && !reduce) timers.push(setTimeout(on, 120 * k)); else on();
+      });
+      if (s.decoded) BYTES[s.msg].forEach(([b, m]) => { const r = document.createElement("div"); r.innerHTML = `<code>${b}</code> ${m}`; legend.appendChild(r); });
+      if (s.dir === "toa") {
+        const r = document.createElement("div"); r.className = "senders";
+        r.innerHTML = `<span class="same">The same bytes from</span>${[["people", "People"], ["ai", "AI"], ["programs", "Programs"]].map(([k, n]) => `<button class="sender" type="button" data-tab="${k}">${n}</button>`).join("")}`;
+        legend.appendChild(r);
+      }
+      else { const r = document.createElement("div"); r.textContent = `${BYTES[s.msg].length} byte${BYTES[s.msg].length > 1 ? "s" : ""}: only values, no names. Meaningless without the schema.`; legend.appendChild(r); }
+    } else {
+      nat.hidden = true;
+    }
+    direction(s.msg ? s.dir : null);
+    // The one automatic jump: Started names its next editor through WorkflowRequest.
+    const jump = $("jump");
+    jump.hidden = s.msg !== "started";
+    jump.classList.remove("play");
+    if (!jump.hidden && animate && !reduce) { void jump.offsetWidth; jump.classList.add("play"); }
+    // client: People, AI and Programs for the request in focus
+    $("schema").innerHTML = SCHEMA[s.schema];
+    $("gui").innerHTML = s.gui;
+    const req = i < 3 ? "start" : "save";
+    $("ai-tool-lbl").textContent = `Tool for ${req === "start" ? "Start" : "SaveFilingStatus"}`;
+    $("ai-tool").innerHTML = esc(AI[req].tool);
+    $("ai-args").textContent = AI[req].args;
+    $("prog-lbl").textContent = `${lang === "rust" ? "Rust" : "TypeScript"}: sending ${req === "start" ? "Start" : "SaveFilingStatus"}`;
+    $("prog").textContent = PROGRAM[req][lang];
+    for (const id of ["ai-bytes", "prog-bytes"]) $(id).innerHTML = BYTES[req].map(([b, m, v]) => `<span class="byte on${v ? " v" : ""}" title="${m}">${b}</span>`).join("");
+    // dots
+    const dots = $("dots"); dots.innerHTML = "";
+    STEPS.forEach((_, k) => {
+      const b = document.createElement("button"); b.type = "button"; b.id = "step-" + k; b.setAttribute("aria-label", "Step " + (k + 1) + " of " + STEPS.length); if (k === i) b.setAttribute("aria-current", "step");
+      b.className = "dot" + (k < i ? " done" : "") + (k === i ? " now" : "");
+      b.addEventListener("click", () => { stop(); i = k; render(true); });
+      dots.appendChild(b);
+    });
+  }
+
+  function setTab(t, focus) {
+    tab = t;
+    for (const k of ["people", "ai", "programs"]) {
+      const b = $("tab-" + k), on = k === t;
+      b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1;
+      $("panel-" + k).hidden = !on;
+    }
+    if (focus) $("tab-" + t).focus();
+  }
+  for (const k of ["people", "ai", "programs"]) $("tab-" + k).addEventListener("click", () => setTab(k));
+  $("col-client").querySelector(".tabs").addEventListener("keydown", (e) => {
+    const order = ["people", "ai", "programs"], k = order.indexOf(tab);
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); setTab(order[(k + (e.key === "ArrowRight" ? 1 : 2)) % 3], true); }
+    else if (e.key === "Home" || e.key === "End") { e.preventDefault(); e.stopPropagation(); setTab(e.key === "Home" ? "people" : "programs", true); }
+  });
+  $("legend").addEventListener("click", (e) => { const b = e.target.closest(".sender"); if (b) setTab(b.dataset.tab, true); });
+
+  function setLang(l) {
+    lang = l;
+    $("lang-rust").setAttribute("aria-pressed", String(l === "rust"));
+    $("lang-ts").setAttribute("aria-pressed", String(l === "ts"));
+    try { localStorage.setItem("decl-lang", l); } catch (e) {}
+    render(false);
+  }
+  function stop() { playing = false; clearTimeout(timer); $("play").textContent = "▶ Play"; }
+  function tick() { if (!playing) return; if (i >= STEPS.length - 1) { stop(); return; } i++; render(true); timer = setTimeout(tick, 4200); }
+  $("play").addEventListener("click", () => {
+    if (playing) { stop(); return; }
+    if (i >= STEPS.length - 1) { i = 0; render(false); }
+    playing = true; $("play").textContent = "❚❚ Pause"; timer = setTimeout(tick, 1500);
+  });
+  $("first").addEventListener("click", () => { stop(); i = 0; render(false); });
+  $("prev").addEventListener("click", () => { stop(); i = Math.max(0, i - 1); render(false); });
+  $("next").addEventListener("click", () => { stop(); i = Math.min(STEPS.length - 1, i + 1); render(true); });
+  $("lang-rust").addEventListener("click", () => setLang("rust"));
+  $("lang-ts").addEventListener("click", () => setLang("ts"));
+  document.addEventListener("keydown", (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    // A focused control keeps its own Space/Enter behavior.
+    if (e.key === " " && e.target.closest && e.target.closest("button, a, input, textarea, select")) return;
+    if (e.key === "ArrowRight") $("next").click();
+    else if (e.key === "ArrowLeft") $("prev").click();
+    else if (e.key === " ") { e.preventDefault(); $("play").click(); }
+    else if (e.key === "Home") { e.preventDefault(); $("first").click(); }
+  });
+  try { const l = localStorage.getItem("decl-lang"); if (l === "ts" || l === "rust") lang = l; } catch (e) {}
+  $("lang-rust").setAttribute("aria-pressed", String(lang === "rust"));
+  $("lang-ts").setAttribute("aria-pressed", String(lang === "ts"));
+  render(false);
+})();
+</script>
+</body>
+</html>

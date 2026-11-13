@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Data is everything. · Libertas</title>
+<meta name="description" content="One W-2 declaration and five display rules: watch a client choose panes, a table, form columns and label placement by the platform's width rules, from phone to web.">
+<style>
+/* Layout: declaration and display rules on top; a stage where one window sweeps from phone to desktop width; three device frames rendering the same data below. */
+/* signal-tokens: the one Signal token set; interactive pages carry this exact block. */
+:root {
+  --bg: #f5f8f7; --surface: #ffffff; --wash: #ecf2ef; --code-bg: #f1f5f3;
+  --ink: #14201d; --muted: #4b5f5a; --line: #d3ded9; --line-strong: #a9bab4;
+  --brand: #0b6b5c; --brand-strong: #07574a; --on-brand: #ffffff; --brand-tint: #e1f1ec;
+  --app: #6639c9; --on-app: #ffffff; --app-tint: #efe9fc;
+  --data: #d98a00; --data-ink: #8f4f00; --on-data: #1c1300; --data-tint: #fff1d9;
+  --frame: #1a2623; --screen: #ffffff; --shadow: 0 1px 2px #14201d0f, 0 8px 24px #14201d0d;
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --step--1: .875rem; --step-0: 1rem; --step-1: 1.25rem; --step-2: 1.5625rem; --step-3: 1.953rem; --step-4: 2.441rem; --step-5: 3.052rem;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1412; --surface: #131d1a; --wash: #192521; --code-bg: #0f1816;
+    --ink: #e3ece8; --muted: #9eb2ac; --line: #263430; --line-strong: #3d504a;
+    --brand: #4cc6ae; --brand-strong: #7ad8c5; --on-brand: #05201a; --brand-tint: #11302a;
+    --app: #b8a0ff; --on-app: #160e2c; --app-tint: #231d3b;
+    --data: #ffb444; --data-ink: #ffc56e; --on-data: #1c1300; --data-tint: #30240e;
+    --frame: #030706; --screen: #101917; --shadow: 0 1px 2px #0006, 0 8px 24px #0004;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1412; --surface: #131d1a; --wash: #192521; --code-bg: #0f1816;
+  --ink: #e3ece8; --muted: #9eb2ac; --line: #263430; --line-strong: #3d504a;
+  --brand: #4cc6ae; --brand-strong: #7ad8c5; --on-brand: #05201a; --brand-tint: #11302a;
+  --app: #b8a0ff; --on-app: #160e2c; --app-tint: #231d3b;
+  --data: #ffb444; --data-ink: #ffc56e; --on-data: #1c1300; --data-tint: #30240e;
+  --frame: #030706; --screen: #101917; --shadow: 0 1px 2px #0006, 0 8px 24px #0004;
+  color-scheme: dark;
+}
+/* signal-tokens:end */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font); }
+a { color: var(--brand); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; display: grid; gap: 22px; }
+.back { font-size: .85rem; font-weight: 600; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+h1 { margin: 0; font-weight: 800; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -0.02em; line-height: 1.05; text-wrap: balance; }
+.lede { margin: 14px 0 0; display: grid; gap: 4px; max-width: 26ch; font-size: clamp(1.3rem, 2.6vw, 1.85rem); line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance; }
+.lede strong { font-weight: 700; color: var(--ink); }
+.lede span { font-weight: 500; color: var(--muted); }
+.top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 20px; align-items: center; }
+@media (max-width: 900px) { .top { grid-template-columns: minmax(0, 1fr); } }
+.code { display: grid; gap: 12px; min-width: 0; }
+.code > div { min-width: 0; }
+pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font: 12.5px/1.55 var(--mono); overflow-x: auto; }
+pre:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.cm { color: var(--muted); } .kw { color: var(--app); } .ty { color: var(--brand); } .at { color: var(--data-ink); }
+.codehead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px; font-size: .8rem; color: var(--muted); }
+.codehead b { color: var(--ink); font-size: .95rem; }
+
+/* Stage */
+.stage { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.ruler { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.dp { font: 800 1.6rem var(--mono); font-variant-numeric: tabular-nums; min-width: 6.5ch; }
+.classes { display: flex; gap: 6px; flex-wrap: wrap; }
+.cls { font: 700 .74rem var(--font); letter-spacing: .04em; border: 1.5px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--muted); transition: background-color .2s, color .2s, border-color .2s; }
+.cls.on { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.device { font: 800 .9rem var(--font); color: var(--brand); }
+.ctl { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ctl label { font-size: .8rem; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.ctl input[type=range] { width: min(240px, 50vw); accent-color: var(--brand); }
+.btn { font: 800 .85rem var(--font); border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 6px 12px; cursor: pointer; }
+.btn:focus-visible, input:focus-visible, .back:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.viewport { position: relative; height: 470px; overflow: hidden; border-radius: 16px; background: repeating-linear-gradient(90deg, transparent 0 39px, color-mix(in srgb, var(--line) 55%, transparent) 39px 40px); }
+@media (max-width: 600px) { .viewport { height: 340px; } }
+.win { position: absolute; left: 0; top: 0; transform-origin: top left; border-radius: 14px; background: var(--screen); border: 2px solid var(--frame); overflow: hidden; box-shadow: 0 24px 50px -28px rgba(0,0,0,.55); }
+.events { min-height: 1.8em; display: flex; gap: 8px; flex-wrap: wrap; }
+.ev { font: 700 .8rem var(--font); background: color-mix(in srgb, var(--data) 22%, var(--surface)); border: 1px solid var(--data); border-radius: 999px; padding: 2px 10px; animation: evin .4s ease-out both; }
+@keyframes evin { from { opacity: 0; transform: translateY(6px) scale(.95); } }
+.why { font-size: .82rem; color: var(--muted); margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
+
+/* The app screen (rendered at logical dp as CSS px, then scaled). Text sizes are fixed px so measurement matches. */
+.app { font: 14px/1.4 var(--font); color: var(--ink); height: 100%; display: flex; flex-direction: column; }
+.bar { height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--surface); font-weight: 800; flex: none; }
+.bar .back2 { color: var(--brand); font-weight: 700; }
+.body { flex: 1; display: flex; min-height: 0; }
+.pane { min-width: 0; overflow: hidden; display: flex; flex-direction: column; }
+.pane.lead { background: var(--surface); }
+.gutter { flex: none; width: 16px; border-inline: 1px solid var(--line); background: var(--screen); }
+.ph { padding: 12px 12px 6px; font: 800 12px var(--font); color: var(--muted); }
+.cards { padding: 0 12px 12px; display: grid; gap: 8px; }
+.card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--surface); }
+.card.sel { border-color: var(--brand); background: var(--brand-tint); }
+.card .n { font-weight: 800; }
+.card .s { font-size: 12px; color: var(--muted); }
+.tbl { margin: 0 12px; display: grid; column-gap: 16px; font: 13px/1.35 var(--font); }
+.tbl > div { padding: 8px 0; border-bottom: 1px solid var(--line); overflow-wrap: break-word; min-width: 0; }
+.tbl > .h { font: 700 12px/1.3 var(--font); color: var(--muted); padding: 6px 0; align-self: end; }
+.tbl > .num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+.tbl > .sel { background: var(--brand-tint); }
+.tbl > .h.num { white-space: normal; font-family: var(--font); }
+.ed { padding: 12px 16px; display: grid; gap: 4px; align-content: start; overflow: hidden; }
+.ed h3 { margin: 0 0 6px; font-size: 17px; }
+.grid { display: grid; gap: 0 16px; }
+.fld { display: flex; align-items: baseline; justify-content: space-between; gap: 2px 16px; padding: 8px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.fld .l { color: var(--muted); font: 13px var(--font); }
+.fld .v { font: 500 13px var(--mono); white-space: nowrap; }
+.fld.below { flex-direction: column; align-items: stretch; }
+.choices { display: flex; gap: 6px 16px; flex-wrap: nowrap; }
+.choices.vertical { flex-direction: column; }
+.ch { display: inline-flex; align-items: center; gap: 6px; font: 13px var(--font); white-space: nowrap; }
+.ch::before { content: ""; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--muted); box-sizing: border-box; flex: none; }
+.ch.on::before { border-color: var(--brand); background: radial-gradient(circle, var(--brand) 0 3px, transparent 3.5px); }
+.cta { margin: 10px 16px 14px; padding: 10px; border-radius: 10px; background: var(--brand); color: var(--on-brand); font-weight: 800; text-align: center; flex: none; }
+.flashy { animation: flash .9s ease-out; }
+@keyframes flash { 0% { box-shadow: inset 0 0 0 3px var(--data); } 100% { box-shadow: inset 0 0 0 0 transparent; } }
+
+/* Three devices */
+.devices { display: grid; grid-template-columns: minmax(0, .55fr) minmax(0, 1.05fr) minmax(0, 1.6fr); gap: 18px; align-items: end; }
+@media (max-width: 900px) { .devices { grid-template-columns: minmax(0, 1fr); } }
+.dev { display: grid; gap: 8px; justify-items: center; min-width: 0; margin: 0; }
+.dev .lab { font: 800 .9rem var(--font); }
+.dev .sub { font-size: .78rem; color: var(--muted); margin-top: -6px; text-align: center; }
+.dev .shell { background: var(--frame); padding: 8px; border-radius: 26px; width: 100%; }
+.dev.phone .shell { max-width: 360px; }
+.dev.tablet .shell { border-radius: 22px; padding: 10px; }
+.dev.web .shell { border-radius: 12px; padding: 0; }
+.dev.web .chrome { height: 26px; background: var(--frame); border-radius: 12px 12px 0 0; display: flex; gap: 6px; align-items: center; padding-left: 10px; }
+.dev.web .chrome i { width: 9px; height: 9px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 60%, transparent); display: block; }
+.dev .screen { position: relative; overflow: hidden; border-radius: 18px; background: var(--screen); }
+.dev.web .screen { border-radius: 0 0 12px 12px; border: 2px solid var(--frame); border-top: 0; }
+.dev .screen .win { position: absolute; border: 0; border-radius: 0; box-shadow: none; }
+.points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .points { grid-template-columns: minmax(0, 1fr); } }
+.pt { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.pt b { display: block; font-size: 1.05rem; }
+.pt span { color: var(--muted); font-size: .92rem; }
+.foot { font-size: .8rem; color: var(--muted); margin: 0; }
+.nojs { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="main">
+  <a class="back" href="../../concepts/data-is-everything.html">← Data is everything: the explanation</a>
+  <div class="top">
+    <header>
+      <h1>Data is everything.</h1>
+      <p class="lede"><strong>Presentation takes care of itself.</strong><span>Adjust it with AI, on live data.</span></p>
+    </header>
+    <div class="code">
+      <div>
+        <div class="codehead"><b>The declaration</b><span>Rust · comments become the words</span></div>
+<pre tabindex="0" aria-label="The W-2 declaration in Rust"><span class="cm">/// W-2 wage statement</span>
+<span class="at">#[derive(LibertasExport, LibertasAvroDecode, LibertasAvroEncode)]</span>
+<span class="kw">pub struct</span> <span class="ty">W2</span> {
+    <span class="cm">/// Employer</span>
+    <span class="kw">pub</span> employer: <span class="ty">String</span>,
+    <span class="cm">/// Employer ID (EIN)</span>
+    <span class="kw">pub</span> ein: <span class="ty">String</span>,
+    <span class="cm">/// Wages, tips, other pay</span>
+    <span class="at">#[libertas_money("USD", 2)]</span> <span class="kw">pub</span> wages: <span class="ty">i64</span>,
+    <span class="cm">/// Federal tax withheld</span>
+    <span class="at">#[libertas_money("USD", 2)]</span> <span class="kw">pub</span> federal_withheld: <span class="ty">i64</span>,
+    <span class="cm">/// Social Security wages</span>
+    <span class="at">#[libertas_money("USD", 2)]</span> <span class="kw">pub</span> ss_wages: <span class="ty">i64</span>,
+    <span class="cm">/// State</span>
+    <span class="kw">pub</span> state: <span class="ty">TaxState</span>,
+    <span class="cm">/// Retirement plan</span>
+    <span class="kw">pub</span> retirement_plan: <span class="ty">bool</span>,
+    <span class="cm">/// Overtime deduction</span>
+    <span class="at">#[libertas_inline_choices]</span> <span class="kw">pub</span> overtime: <span class="ty">WageDeductionEligibility</span>,
+}</pre>
+      </div>
+      <div>
+        <div class="codehead"><b>The adjustment</b><span>display.json · arrangement only, no sizes</span></div>
+<pre tabindex="0" aria-label="Five Display Template rules in display.json">{ <span class="ty">"select"</span>: "^&lt;Income&gt;", <span class="ty">"right_pane"</span>: ["EditW2"], <span class="ty">"refresh"</span>: "OpenIncome" },
+{ <span class="ty">"select"</span>: "^&lt;Income.w2s&gt;", <span class="ty">"layout"</span>: "table",
+  <span class="ty">"columns"</span>: ["employer", "wages", "federal_withheld", "retirement_plan"] },
+{ <span class="ty">"select"</span>: "^&lt;EditW2.w2&gt;", <span class="ty">"layout"</span>: "form-grid", <span class="ty">"columns"</span>: 3 },
+{ <span class="ty">"select"</span>: "^&lt;EditW2.w2&gt;.employer", <span class="ty">"style"</span>: { <span class="ty">"span"</span>: 2 } },
+{ <span class="ty">"select"</span>: "^&lt;EditW2.w2&gt;.overtime", <span class="ty">"style"</span>: { <span class="ty">"span"</span>: 3 } }</pre>
+      </div>
+    </div>
+  </div>
+
+  <noscript><p class="nojs">The moving window needs JavaScript. The <a href="../../concepts/data-is-everything.html">explanation page</a> lists the same decisions at phone, tablet and web widths.</p></noscript>
+
+  <section class="stage" aria-label="One screen, every width">
+    <div class="ruler">
+      <span class="dp" id="dp">390 dp</span>
+      <div class="classes" id="classes" aria-label="Width class">
+        <span class="cls" data-c="compact">compact</span><span class="cls" data-c="medium">medium</span><span class="cls" data-c="expanded">expanded</span><span class="cls" data-c="large">large</span><span class="cls" data-c="extra-large">extra-large</span>
+      </div>
+      <span class="device" id="device">Phone</span>
+      <div class="ctl">
+        <label for="width">Window width <input type="range" id="width" min="360" max="1920" step="2" value="390"></label>
+        <button class="btn" id="pause" type="button">❚❚ Pause</button>
+      </div>
+    </div>
+    <div class="viewport" id="viewport" role="img" aria-label="The Income page at the window width shown above, laid out by the platform's width rules"><div class="win" id="morph"></div></div>
+    <p class="why" id="why"></p>
+    <div class="events" id="events" aria-live="polite"></div>
+  </section>
+
+  <section class="devices" aria-label="The same data on three devices">
+    <figure class="dev phone"><div class="lab">Phone</div><div class="sub" id="sub-phone"></div><div class="shell"><div class="screen" id="s-phone" role="img" aria-label="Phone: the W-2 list on its own page, as row cards"></div></div></figure>
+    <figure class="dev tablet"><div class="lab">Tablet</div><div class="sub" id="sub-tablet"></div><div class="shell"><div class="screen" id="s-tablet" role="img" aria-label="Tablet: the W-2 list beside the editor"></div></div></figure>
+    <figure class="dev web"><div class="lab">Web/TV</div><div class="sub" id="sub-web"></div><div class="shell"><div class="chrome" aria-hidden="true"><i></i><i></i><i></i></div><div class="screen" id="s-web" role="img" aria-label="Web or TV: the W-2 table beside a three-column editor"></div></div></figure>
+  </section>
+
+  <div class="points">
+    <div class="pt"><b>One declaration</b><span>Eight commented fields say what the data is. Five rules ask for panes, a table, a form grid and wider rows for two fields, never for a size.</span></div>
+    <div class="pt"><b>Every size decided for you</b><span>Panes, columns, tables and labels follow the space available, by the platform's width rules.</span></div>
+    <div class="pt"><b>Same everywhere</b><span>Android, iOS and Studio make the same decisions from the same rules and the same data.</span></div>
+  </div>
+  <p class="foot">Pane count, form columns, table fit and label placement are computed here with the platform's own rules, at normal text size, measuring this page's text in this browser's font. The screens are conceptual drawings, not product screenshots, and the W-2 records are invented.</p>
+</main>
+
+<script>
+(() => {
+  const W2S = [
+    { employer: "Northwind Community Health Clinic, Inc.", ein: "12-3456789", wages: "52,000.00", fed: "6,240.00", ss: "52,000.00", state: "California (CA)", retire: true, ot: 2 },
+    { employer: "Blue Fern Studio", ein: "98-7654321", wages: "8,400.00", fed: "504.00", ss: "8,400.00", state: "California (CA)", retire: false, ot: 0 },
+    { employer: "Harbor Books", ein: "45-6789012", wages: "2,150.00", fed: "96.00", ss: "2,150.00", state: "Oregon (OR)", retire: false, ot: 0 },
+  ];
+  const SEL = 0;
+  const OT = ["No amount to classify", "Ineligible — no deduction", "Eligible for the deduction"];
+  const FIELDS = [
+    ["Employer", "employer"], ["Employer ID (EIN)", "ein"], ["Wages, tips, other pay", "wages", "money"],
+    ["Federal tax withheld", "fed", "money"], ["Social Security wages", "ss", "money"],
+    ["State", "state"], ["Retirement plan", "retire", "bool"], ["Overtime deduction", "ot", "choice"],
+  ];
+  const CHOICES = { retire: ["Yes", "No"], ot: OT };
+  const SPAN = { employer: 2, ot: 3 };                 // the display.json span tokens
+  const chosen = (key, x) => key === "retire" ? (x.retire ? 0 : 1) : x[key];
+  const COLUMNS = [["Employer", "employer", "text"], ["Wages, tips, other pay", "wages", "money"], ["Federal tax withheld", "fed", "money"], ["Retirement plan", "retire", "bool"]];
+  const money = (v) => "$" + v;
+
+  // ---- The platform's width rules (presentation.md, "Width-based layout"), as Studio's planner applies them.
+  const GUTTER = 16;                                    // the split gutter and label-value gap, in dp
+  const MIN = { compact: 360, medium: 600, expanded: 840, large: 1200, "extra-large": 1600 }; // min_width tokens
+  const cls = (w) => w < 600 ? "compact" : w < 840 ? "medium" : w < 1200 ? "expanded" : w < 1600 ? "large" : "extra-large";
+  const CAPS = { compact: [1, 1], medium: [2, 2], expanded: [2, 3], large: [2, 4], "extra-large": [2, 4] }; // [panes, columns]
+  const LEAD_MIN = MIN.compact, TRAIL_MIN = MIN.compact, LEAD_SHARE = 2 / (2 + 3); // default panes: compact, ratios 2 and 3
+  const GLYPH = 13 + 6;                                 // radio glyph plus its gap, as Studio measures choices
+  const PAD = 12;                                       // this drawing's pane padding, in dp
+
+  // Text measurement in the drawing's own fonts, as clients measure native text.
+  const ctx = document.createElement("canvas").getContext("2d");
+  const family = getComputedStyle(document.documentElement).getPropertyValue("--font").trim();
+  const monoFamily = getComputedStyle(document.documentElement).getPropertyValue("--mono").trim();
+  const measure = (text, font) => {
+    ctx.font = font;
+    const natural = ctx.measureText(text).width;
+    const longestWord = Math.max(0, ...text.split(/\s+/).map((w) => ctx.measureText(w).width));
+    return { natural, longestWord };
+  };
+  const F = { label: `13px ${family}`, value: `500 13px ${monoFamily}`, choice: `13px ${family}`, cell: `13px ${family}`, num: `13px ${monoFamily}`, head: `700 12px ${family}` };
+
+  function formGridColumns(widthDp, columns, cap) {
+    const fit = Math.floor((widthDp + GUTTER) / (MIN.compact + GUTTER));
+    return Math.max(1, Math.min(fit, columns, Math.max(1, cap)));
+  }
+  function tableColumnFit(widthDp, em, columns) {
+    const minimums = columns.map((c) => Math.max(c.header.longestWord, ...c.cells.map((cell) => cell.wraps ? Math.min(cell.natural, Math.max(cell.longestWord, 12 * em)) : cell.natural)));
+    const naturals = columns.map((c) => Math.max(c.header.natural, ...c.cells.map((cell) => cell.natural)));
+    const wrapping = columns.map((c) => c.cells.some((cell) => cell.wraps));
+    const minimumDp = GUTTER * Math.max(0, columns.length - 1) + minimums.reduce((a, b) => a + b, 0);
+    const spare = widthDp - minimumDp;
+    if (spare < 0) return { fits: false, minimumDp };
+    const anyWrap = wrapping.some(Boolean);
+    const weights = columns.map((_, i) => anyWrap ? (wrapping[i] ? naturals[i] : 0) : minimums[i]);
+    const total = weights.reduce((a, b) => a + b, 0);
+    return { fits: true, minimumDp, widths: minimums.map((m, i) => m + (total > 0 ? spare * weights[i] / total : spare / columns.length)) };
+  }
+  function inlineChoiceRung(rowDp, title, choices) {
+    const line = choices.reduce((a, b) => a + b, 0) + GUTTER * Math.max(0, choices.length - 1);
+    const t = title.natural > 0 ? Math.min(title.natural, Math.max(title.longestWord, 0.4 * rowDp)) : 0;
+    if ((t > 0 ? t + GUTTER : 0) + line <= rowDp) return "beside";
+    return line <= rowDp ? "below" : "vertical";
+  }
+
+  // The selected record's rows and the table's columns do not change with width, so measure them once.
+  const w2 = W2S[SEL];
+  const ROWS = FIELDS.map(([label, key, kind]) => {
+    const l = measure(label, F.label);
+    if (CHOICES[key]) return { label, l, choices: CHOICES[key].map((c) => measure(c, F.choice).natural + GLYPH) };
+    const text = kind === "money" ? money(w2[key]) : w2[key];
+    return { label, l, text, v: measure(text, F.value).natural };
+  });
+  const TABLE = COLUMNS.map(([header, key, kind]) => ({
+    header: measure(header, F.head),
+    cells: W2S.map((x) => kind === "money" ? { ...measure(money(x[key]), F.num), wraps: false }
+      : kind === "bool" ? { ...measure(x[key] ? "Yes" : "No", F.cell), wraps: false } : { ...measure(x[key], F.cell), wraps: true }),
+  }));
+
+  function decide(w) {
+    const c = cls(w), [paneCap, colCap] = CAPS[c];
+    const two = paneCap >= 2 && w >= LEAD_MIN + GUTTER + TRAIL_MIN;
+    const shared = w - GUTTER;
+    const lead = two ? Math.min(shared - TRAIL_MIN, Math.max(LEAD_MIN, LEAD_SHARE * shared)) : 0;
+    const trail = two ? shared - lead : w;
+    const gridW = trail - 2 * PAD;
+    const cols = formGridColumns(gridW, 3, colCap);
+    const cellW = (gridW - (cols - 1) * GUTTER) / cols;
+    // A span larger than the columns in use is reduced to them; the field gets those columns and the gutters between them.
+    const spans = FIELDS.map(([, key]) => Math.min(SPAN[key] || 1, cols));
+    const rowW = spans.map((s) => s * cellW + (s - 1) * GUTTER);
+    const rows = ROWS.map((r, i) => r.choices ? inlineChoiceRung(rowW[i], r.l, r.choices) : (r.l.natural + GUTTER + r.v <= rowW[i] ? "beside" : "below"));
+    // The list's table fit uses the width the list has: the leading pane, or the whole window when the list is shown alone.
+    const listW = (two ? lead : w) - 2 * PAD;
+    const table = tableColumnFit(listW, 13, TABLE);
+    return { c, colCap, two, lead, trail, listW, gridW, cols, cellW, spans, rows, table, beside: rows.filter((r) => r === "beside").length };
+  }
+
+  function value(f, kind) {
+    const [, key] = f;
+    if (kind === "bool") return "";
+    return `<span class="v">${f[2] === "money" ? money(w2[key]) : w2[key]}</span>`;
+  }
+  function list(d) {
+    const head = `<div class="ph">W-2 statements</div>`;
+    if (d.table && d.table.fits) {
+      const cells = W2S.map((x, k) => COLUMNS.map(([, key, kind]) => `<div class="${kind === "money" ? "num" : ""} ${k === SEL && d.two ? "sel" : ""}">${kind === "money" ? money(x[key]) : kind === "bool" ? (x[key] ? "Yes" : "No") : x[key]}</div>`).join("")).join("");
+      return head + `<div class="tbl" style="grid-template-columns:${d.table.widths.map((x) => x.toFixed(1) + "px").join(" ")}">${COLUMNS.map(([h, , kind]) => `<div class="h ${kind === "money" ? "num" : ""}">${h}</div>`).join("")}${cells}</div>`;
+    }
+    return head + `<div class="cards">${W2S.map((x, k) => `<div class="card ${k === SEL && d.two ? "sel" : ""}"><div class="n">${x.employer}</div><div class="s">Wages ${money(x.wages)} · Withheld ${money(x.fed)}</div></div>`).join("")}</div>`;
+  }
+  function editor(d) {
+    const fld = (f, i) => {
+      const r = d.rows[i];
+      if (CHOICES[f[1]]) {
+        const choices = `<span class="choices ${r === "vertical" ? "vertical" : ""}">${CHOICES[f[1]].map((c, k) => `<span class="ch ${chosen(f[1], w2) === k ? "on" : ""}">${c}</span>`).join("")}</span>`;
+        return `<div class="fld ${r === "beside" ? "" : "below"}" style="grid-column:span ${d.spans[i]}"><span class="l">${f[0]}</span>${choices}</div>`;
+      }
+      return `<div class="fld ${r === "beside" ? "" : "below"}" style="grid-column:span ${d.spans[i]}"><span class="l">${f[0]}</span>${value(f)}</div>`;
+    };
+    return `<div class="ed"><h3>Edit W-2</h3><div class="grid" style="grid-template-columns:repeat(${d.cols},minmax(0,1fr))">${FIELDS.map(fld).join("")}</div></div>`;
+  }
+  // One pane shows one page at a time: the list on its own, or the editor on its own.
+  function screen(el, w, h, page) {
+    const d = decide(w);
+    el.style.width = w + "px"; el.style.height = h + "px";
+    const body = d.two
+      ? `<div class="pane lead" style="width:${d.lead}px">${list(d)}</div><div class="gutter"></div><div class="pane" style="width:${d.trail}px">${editor(d)}<div class="cta">Next</div></div>`
+      : page === "list" ? `<div class="pane lead" style="flex:1">${list(d)}</div>`
+      : `<div class="pane" style="flex:1">${editor(d)}<div class="cta">Next</div></div>`;
+    el.innerHTML = `<div class="app"><div class="bar">${d.two || page === "list" ? "" : '<span class="back2">‹</span>'}<span>Income · W-2</span></div><div class="body">${body}</div></div>`;
+    return d;
+  }
+  const summary = (w, d, page) => d.two
+    ? `${w} dp · two panes · list as ${d.table.fits ? "a table" : "rows"} · ${d.cols}-column form`
+    : `${w} dp · one pane · ${page === "list" ? `list as ${d.table.fits ? "a table" : "rows"}` : `${d.cols}-column form`}`;
+
+  // ---- Static devices: render at logical size, then scale to the frame width
+  function device(id, w, h, page) {
+    const host = document.getElementById(id);
+    host.innerHTML = '<div class="win"></div>';
+    const win = host.firstChild;
+    const d = screen(win, w, h, page);
+    document.getElementById("sub-" + id.slice(2)).textContent = summary(w, d, page);
+    const fit = () => { const s = host.clientWidth / w; win.style.transform = `scale(${s})`; host.style.height = (h * s) + "px"; };
+    fit(); return fit;
+  }
+  const fits = [device("s-phone", 390, 700, "list"), device("s-tablet", 834, 620), device("s-web", 1920, 820)];
+  window.addEventListener("resize", () => fits.forEach((f) => f()));
+
+  // ---- The morph: one window sweeps through widths and re-lays out live
+  const morph = document.getElementById("morph"), vp = document.getElementById("viewport"), slider = document.getElementById("width");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const STOPS = [{ w: 390, name: "Phone" }, { w: 600, name: "Small tablet" }, { w: 834, name: "Tablet" }, { w: 1180, name: "Laptop" }, { w: 1440, name: "Desktop" }, { w: 1920, name: "Web/TV" }];
+  const WIDEST = 1920, H = 640;
+  let prev = null, playing = !reduce, t0 = performance.now(), raf = null, current = 390, currentName = "Phone";
+  const PAUSE = 1400, MOVE = 1600;
+  const RUNG = { beside: "beside the label", below: "below the label", vertical: "one per line" };
+
+  function event(text) {
+    const ev = document.getElementById("events");
+    const s = document.createElement("span"); s.className = "ev"; s.textContent = text;
+    ev.prepend(s);
+    while (ev.children.length > 6) ev.lastChild.remove();
+  }
+  function report(d, w, name) {
+    document.getElementById("dp").textContent = Math.round(w) + " dp";
+    document.querySelectorAll(".cls").forEach((c) => c.classList.toggle("on", c.dataset.c === d.c));
+    document.getElementById("device").textContent = name;
+    const r = Math.round;
+    const form = `Form: ${d.cols} of 3 columns (cap ${d.colCap}), ${r(d.cellW)} dp each. ${d.beside} of 8 values beside their labels.`;
+    document.getElementById("why").textContent = d.two
+      ? `${r(w)} ≥ 360 + 16 + 360: two panes, ${r(d.lead)} + 16 + ${r(d.trail)} dp. List: the table needs ${r(d.table.minimumDp)} of ${r(d.listW)} dp, so ${d.table.fits ? "a table" : "rows"}. ${form}`
+      : `${r(w)} dp ${CAPS[d.c][0] < 2 ? "is compact" : "is under 736"}: one pane, the editor alone. ${form}`;
+    if (prev) {
+      if (d.c !== prev.c) event(`Width class: ${d.c}`);
+      if (d.two !== prev.two) event(d.two ? "Two panes: the list beside the editor" : "One pane: the editor alone");
+      const tf = d.two && d.table.fits, pf = prev.two && prev.table.fits;
+      if (d.two && (!prev.two || tf !== pf)) event(tf ? "The list is a table" : "The list is rows");
+      if (d.cols !== prev.cols) event(`Form: ${d.cols} column${d.cols > 1 ? "s" : ""}`);
+      d.rows.forEach((rung, i) => { if (rung !== prev.rows[i]) event(`${FIELDS[i][0]}: ${CHOICES[FIELDS[i][1]] ? "choices" : "value"} ${RUNG[rung]}`); });
+      if (d.two !== prev.two || tf !== pf || d.cols !== prev.cols) { morph.classList.remove("flashy"); void morph.offsetWidth; morph.classList.add("flashy"); }
+    }
+    prev = d;
+  }
+  function frame(w, name) {
+    current = w; currentName = name;
+    const d = screen(morph, Math.round(w), H);
+    // On a wide stage show true proportions (the widest stop fills it); on a narrow one fit the window so it stays readable.
+    const scale = Math.min(vp.clientWidth / (vp.clientWidth < 700 ? w : WIDEST), vp.clientHeight / H);
+    morph.style.transform = `translate(${(vp.clientWidth - w * scale) / 2}px, ${(vp.clientHeight - H * scale) / 2}px) scale(${scale})`;
+    report(d, w, name);
+    if (document.activeElement !== slider) slider.value = String(Math.round(w));
+  }
+  function tick(t) {
+    if (!playing) { raf = null; return; }
+    const seg = PAUSE + MOVE, legs = STOPS.length - 1, total = seg * legs * 2;
+    const p = Math.max(0, t - t0) % total;
+    const k = Math.floor(p / seg), within = p - k * seg;
+    const forward = k < legs;
+    const a = forward ? k : 2 * legs - k, b = forward ? a + 1 : a - 1;
+    let w, name;
+    if (within < PAUSE) { w = STOPS[a].w; name = STOPS[a].name; }
+    else { const q = (within - PAUSE) / MOVE, e = q < .5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2; w = STOPS[a].w + (STOPS[b].w - STOPS[a].w) * e; name = "Resizing…"; }
+    frame(w, name);
+    raf = requestAnimationFrame(tick);
+  }
+  const pauseBtn = document.getElementById("pause");
+  function setPlaying(on) {
+    playing = on;
+    pauseBtn.textContent = playing ? "❚❚ Pause" : "▶ Play";
+    if (playing && !raf) { t0 = performance.now(); raf = requestAnimationFrame(tick); }
+  }
+  pauseBtn.addEventListener("click", () => setPlaying(!playing));
+  slider.addEventListener("input", () => { setPlaying(false); frame(Number(slider.value), "Chosen width"); });
+  frame(reduce ? WIDEST : STOPS[0].w, reduce ? "Web/TV" : STOPS[0].name);
+  if (reduce) pauseBtn.textContent = "▶ Play";
+  else { t0 = performance.now(); raf = requestAnimationFrame(tick); }
+  window.addEventListener("resize", () => { if (!playing) frame(current, currentName); });
+})();
+</script>
+</body>
+</html>

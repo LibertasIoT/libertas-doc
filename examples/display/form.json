@@ -1,0 +1,14 @@
+{
+  "_comment": "Display Template preset: a request editor. See ../../codebot/display_template.md#display-presets. Copy this file's 'rules' array into your project's display.json (../../reference/presentation.md#display-template-file) and rename every placeholder below to your own schema names, then remove this and the '_placeholders' member.",
+  "_placeholders": {
+    "Type": "The Request variant, or configuration function, whose editor this is: '^<Type>' in every selector below.",
+    "group": "A direct field of Type holding a long, mostly optional group of fields, declared as its own Table type: '^<Type>.group' selects that field.",
+    "category": "An Enumeration or Union field of Type with four or fewer choices, shown inline instead of a chooser."
+  },
+  "DisplayVersion": 1,
+  "rules": [
+    { "select": "^<Type>", "layout": "form-grid", "columns": 2 },
+    { "select": "^<Type>.group", "fold": { "initially_open": false } },
+    { "select": "^<Type>.category", "inline": true }
+  ]
+}

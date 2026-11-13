@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 350" role="img" aria-labelledby="title desc">
+<title id="title">flatten without name row</title>
+<desc id="desc">Schematic row layout before and after a Display Template rule; not a client screenshot.</desc>
+<rect width="360" height="350" rx="12" fill="#f6f8fb"/>
+<g font-family="sans-serif" font-size="16" fill="#182b43">
+<text x="20" y="29" font-weight="700">Without rule · schematic</text>
+<text x="28" y="65">Garden area</text>
+<path d="M28 77 H332" stroke="#ccd5e1"/>
+<text x="48" y="101">Zone name</text>
+<text x="332" y="101" text-anchor="end">Backyard</text>
+<path d="M28 113 H332" stroke="#ccd5e1"/>
+<text x="48" y="137">Daily limit</text>
+<text x="332" y="137" text-anchor="end">20 min</text>
+<path d="M28 149 H332" stroke="#ccd5e1"/>
+<text x="20" y="203" font-weight="700">With rule · schematic</text>
+<text x="28" y="239">Zone name</text>
+<text x="332" y="239" text-anchor="end">Backyard</text>
+<path d="M28 251 H332" stroke="#ccd5e1"/>
+<text x="28" y="275">Daily limit</text>
+<text x="332" y="275" text-anchor="end">20 min</text>
+<path d="M28 287 H332" stroke="#ccd5e1"/>
+</g>
+</svg>
