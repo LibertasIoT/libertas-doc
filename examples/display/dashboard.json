@@ -1,0 +1,22 @@
+{
+  "_comment": "Display Template preset: a Response of summaries and charts. See ../../codebot/display_template.md#display-presets. Copy this file's 'rules' array into your project's display.json (../../reference/presentation.md#display-template-file) and rename every placeholder below to your own schema names, then remove this and the '_placeholders' member.",
+  "_placeholders": {
+    "Dashboard": "The Response variant: '^<Dashboard>' selects it.",
+    "summary": "A direct field of Dashboard holding one or more summary values, declared as its own Table type.",
+    "chart": "Any other direct field of Dashboard, such as a chart root; rename or add fields to the split's second region as needed.",
+    "lines": "A direct field of Dashboard: a List of small Tables long enough to want a table on wide screens.",
+    "LineItem": "The Table type of the 'lines' List's members; 'amount' below is one of its scalar fields."
+  },
+  "DisplayVersion": 1,
+  "rules": [
+    { "select": "^<Dashboard>", "layout": "split", "direction": "row",
+      "regions": [
+        { "fields": ["summary"], "ratio": 1, "layout": "card" },
+        { "fields": ["chart", "lines"], "ratio": 1 }
+      ] },
+    { "select": "^<Dashboard>.summary", "when": { "form": "phone" }, "layout": "card" },
+    { "select": "^<Dashboard>.lines", "layout": "table", "columns": ["label", "amount"] },
+    { "select": "^<Dashboard>.lines[]", "when": { "form": "phone" }, "layout": "card" },
+    { "select": "^<LineItem>.amount", "style": { "align": "end" } }
+  ]
+}

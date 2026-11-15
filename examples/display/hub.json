@@ -1,0 +1,17 @@
+{
+  "_comment": "Display Template preset: a hub Response with a linked List. See ../../codebot/display_template.md#display-presets. Copy this file's 'rules' array into your project's display.json (../../reference/presentation.md#display-template-file) and rename every placeholder below to your own schema names, then remove this and the '_placeholders' member.",
+  "_placeholders": {
+    "Hub": "The leading Response variant with a List of linked rows: '^<Hub>' selects it, and 'items' below is that List's own field name. 'detail' is an optional array: add a selector for each other linked node to highlight while its editor is open.",
+    "EditItem": "The editing Request variant that opens beside Hub in the trailing pane; 'right_pane' lists every editing Request that belongs there (../../reference/presentation.md#master-detail-panes).",
+    "OpenHub": "The pure navigation Request whose NextResponse admits Hub; 'refresh' sends it to load and refresh the leading page. Every field it has is Hidden or ReadOnly and filled by Fixed, Default or CopyFrom from Hub and from each 'right_pane' editor.",
+    "Item": "The List's member type, a Table with a Link to open its row: '^<Item>' selects it wherever it occurs.",
+    "status": "A field of Item, an Enumeration whose members the :condition rules below name; rename NeedsAttention/Continue/Done to your own members.",
+    "OpenItem": "the Request variant that Item's own Link attribute names in the schema; it is not a selector in this file."
+  },
+  "DisplayVersion": 1,
+  "rules": [
+    { "select": "^<Hub>", "layout": "master-detail", "right_pane": ["EditItem"], "refresh": "OpenHub", "detail": ["^<Hub.items>[]"] },
+    { "select": "^<Item>:condition([status] is NeedsAttention)", "style": { "color": "error", "icon": "warning" } },
+    { "select": "^<Item>:condition([status] is Continue)", "style": { "emphasis": "primary" } }
+  ]
+}

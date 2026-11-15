@@ -1,0 +1,420 @@
+{
+  "version": 1,
+  "home": "index.md",
+  "items": [
+    {
+      "title": "Principles",
+      "page": "principles.md",
+      "children": [
+        {
+          "title": "Developer assistant entry",
+          "page": "assistants/developer.md"
+        },
+        {
+          "title": "User assistant entry",
+          "page": "assistants/user.md"
+        }
+      ]
+    },
+    {
+      "title": "Concepts",
+      "page": "concepts/index.md",
+      "children": [
+        {
+          "title": "Three paradigm innovations",
+          "page": "concepts/paradigm.md"
+        },
+        {
+          "title": "Hub architecture",
+          "page": "concepts/hub.md"
+        },
+        {
+          "title": "Logically complete declarations",
+          "page": "concepts/logically-complete-declarations.md"
+        },
+        {
+          "title": "From declaration to page",
+          "page": "concepts/declaration-to-page.md"
+        },
+        {
+          "title": "Data is everything",
+          "page": "concepts/data-is-everything.md"
+        },
+        {
+          "title": "AI-native by design",
+          "page": "concepts/ai-native.md"
+        },
+        {
+          "title": "Coming from the web",
+          "page": "concepts/from-the-web.md"
+        }
+      ]
+    },
+    {
+      "title": "Guides",
+      "page": "guides/index.md",
+      "children": [
+        {
+          "title": "Getting started",
+          "page": "guides/getting-started.md"
+        },
+        {
+          "title": "Try Libertas",
+          "page": "guides/try-libertas.md"
+        },
+        {
+          "title": "Libertas Studio",
+          "page": "studio.md"
+        },
+        {
+          "title": "Using Studio",
+          "page": "guides/studio.md"
+        },
+        {
+          "title": "Developing Apps",
+          "page": "guides/developing-apps.md"
+        },
+        {
+          "title": "Administration",
+          "page": "guides/administration.md"
+        },
+        {
+          "title": "Task controls",
+          "page": "guides/control.md"
+        },
+        {
+          "title": "Charts and visual results",
+          "page": "guides/visualization.md"
+        },
+        {
+          "title": "Chart gallery",
+          "page": "guides/chart-gallery.md"
+        },
+        {
+          "title": "Translation",
+          "page": "guides/translation.md"
+        },
+        {
+          "title": "Plaza",
+          "page": "guides/plaza.md"
+        },
+        {
+          "title": "Troubleshooting",
+          "page": "guides/troubleshooting.md"
+        }
+      ]
+    },
+    {
+      "title": "Reference",
+      "page": "reference/index.md",
+      "children": [
+        {
+          "title": "App contract",
+          "page": "reference/app-contract.md"
+        },
+        {
+          "title": "App code organization",
+          "page": "reference/code-organization.md"
+        },
+        {
+          "title": "TypeScript",
+          "page": "reference/languages/typescript.md"
+        },
+        {
+          "title": "Rust",
+          "page": "reference/languages/rust.md"
+        },
+        {
+          "title": "Source annotations",
+          "page": "reference/annotations.md"
+        },
+        {
+          "title": "Schema artifacts",
+          "page": "reference/schema.md"
+        },
+        {
+          "title": "Documentation",
+          "page": "reference/documentation.md"
+        },
+        {
+          "title": "Function comments",
+          "page": "reference/function-comments.md"
+        },
+        {
+          "title": "Translation",
+          "page": "reference/translation.md"
+        },
+        {
+          "title": "Data-type evolution",
+          "page": "reference/data-type-evolution.md"
+        },
+        {
+          "title": "Validation rules",
+          "page": "reference/validation-rules.md"
+        },
+        {
+          "title": "Endpoint protocols",
+          "page": "reference/protocols.md"
+        },
+        {
+          "title": "Endpoint lifecycle",
+          "page": "reference/endpoint-lifecycle.md"
+        },
+        {
+          "title": "Endpoint presentation",
+          "page": "reference/endpoint-presentation.md"
+        },
+        {
+          "title": "Presentation and localization",
+          "page": "reference/presentation.md"
+        },
+        {
+          "title": "Message format",
+          "page": "reference/message-format.md"
+        },
+        {
+          "title": "2D charts",
+          "page": "reference/charts/2d.md"
+        },
+        {
+          "title": "3D charts",
+          "page": "reference/charts/3d.md"
+        },
+        {
+          "title": "Matter descriptors",
+          "page": "reference/matter/descriptors.md"
+        },
+        {
+          "title": "Matter status",
+          "page": "reference/matter/status.md"
+        },
+        {
+          "title": "Network access",
+          "page": "reference/network-access.md"
+        },
+        {
+          "title": "Deployment dependencies",
+          "page": "reference/deployment.md"
+        },
+        {
+          "title": "Plaza publication",
+          "page": "reference/publication.md"
+        },
+        {
+          "title": "LLM requests",
+          "page": "reference/llm-client-requests.md"
+        }
+      ]
+    },
+    {
+      "title": "Examples",
+      "page": "examples/index.md",
+      "children": [
+        {
+          "title": "Default and Nullable",
+          "page": "examples/default-and-nullable.md"
+        }
+      ]
+    },
+    {
+      "title": "In Action",
+      "page": "in-action.md",
+      "children": [
+        {
+          "title": "From Declaration to Page",
+          "page": "assets/interactive/declaration-to-page.html"
+        },
+        {
+          "title": "Data is everything.",
+          "page": "assets/interactive/data-is-everything.html"
+        },
+        {
+          "title": "Simple Data. Rich Semantics.",
+          "page": "assets/interactive/simple-data-rich-semantics.html"
+        }
+      ]
+    },
+    {
+      "title": "CodeBot workflow",
+      "page": "codebot/index.md",
+      "children": [
+        {
+          "title": "Source policy",
+          "page": "codebot/sources.md"
+        },
+        {
+          "title": "App contract",
+          "page": "codebot/app_contract.md"
+        },
+        {
+          "title": "Designing an App",
+          "page": "codebot/app_design.md"
+        },
+        {
+          "title": "Code organization",
+          "page": "reference/code-organization.md"
+        },
+        {
+          "title": "Code organization rules",
+          "page": "codebot/code_organization.md"
+        },
+        {
+          "title": "Rust",
+          "page": "codebot/rust.md"
+        },
+        {
+          "title": "Rust App rules",
+          "page": "codebot/rust_app.md"
+        },
+        {
+          "title": "TypeScript (development)",
+          "page": "codebot/typescript.md"
+        },
+        {
+          "title": "TypeScript App rules",
+          "page": "codebot/typescript_app.md"
+        },
+        {
+          "title": "Source documentation",
+          "page": "codebot/source_documentation.md"
+        },
+        {
+          "title": "Schema documentation",
+          "page": "codebot/documentation_invariants.md"
+        },
+        {
+          "title": "Function comments",
+          "page": "codebot/function_comment_invariants.md"
+        },
+        {
+          "title": "Translation",
+          "page": "codebot/translation.md"
+        },
+        {
+          "title": "Annotation inventory",
+          "page": "codebot/schema_annotations.md"
+        },
+        {
+          "title": "Data model",
+          "page": "codebot/data_model.md"
+        },
+        {
+          "title": "Protocols and runtime",
+          "page": "codebot/protocols_runtime.md"
+        },
+        {
+          "title": "Endpoint protocol",
+          "page": "codebot/endpoint_protocol.md"
+        },
+        {
+          "title": "Actions, entry and choices",
+          "page": "codebot/actions.md"
+        },
+        {
+          "title": "Links",
+          "page": "codebot/links.md"
+        },
+        {
+          "title": "Workflows",
+          "page": "codebot/workflows.md"
+        },
+        {
+          "title": "Subscriptions",
+          "page": "codebot/subscriptions.md"
+        },
+        {
+          "title": "Endpoint callback code",
+          "page": "codebot/endpoint_runtime.md"
+        },
+        {
+          "title": "Persistent data",
+          "page": "codebot/data_api.md"
+        },
+        {
+          "title": "AI Search",
+          "page": "codebot/ai_search.md"
+        },
+        {
+          "title": "Calculations",
+          "page": "codebot/calculations.md"
+        },
+        {
+          "title": "AI Import",
+          "page": "codebot/ai_import.md"
+        },
+        {
+          "title": "Messages (LMF1)",
+          "page": "codebot/messages_lmf1.md"
+        },
+        {
+          "title": "Network access",
+          "page": "codebot/network_access.md"
+        },
+        {
+          "title": "Data-type evolution",
+          "page": "codebot/data_type_design.md"
+        },
+        {
+          "title": "Validation rules",
+          "page": "codebot/validation.md"
+        },
+        {
+          "title": "ValidationRules syntax",
+          "page": "codebot/validation_rules.md"
+        },
+        {
+          "title": "Presentation",
+          "page": "codebot/presentation.md"
+        },
+        {
+          "title": "Field presentation",
+          "page": "codebot/field_presentation.md"
+        },
+        {
+          "title": "Display Template",
+          "page": "codebot/display_template.md"
+        },
+        {
+          "title": "Formatted output",
+          "page": "codebot/formatted_output.md"
+        },
+        {
+          "title": "Charts",
+          "page": "codebot/charts.md"
+        },
+        {
+          "title": "3D charts",
+          "page": "codebot/charts_3d.md"
+        },
+        {
+          "title": "Matter",
+          "page": "codebot/matter.md"
+        },
+        {
+          "title": "Recipes",
+          "page": "codebot/recipes.md"
+        },
+        {
+          "title": "Validation and delivery",
+          "page": "codebot/delivery.md"
+        },
+        {
+          "title": "Deploying and publishing",
+          "page": "codebot/deployment_publication.md"
+        }
+      ],
+      "topNav": false
+    },
+    {
+      "title": "Legal",
+      "page": "legal/privacy.md",
+      "children": [
+        {
+          "title": "Support",
+          "page": "legal/support.md"
+        }
+      ],
+      "topNav": false
+    }
+  ]
+}

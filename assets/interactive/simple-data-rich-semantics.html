@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Simple Data. Rich Semantics. · Libertas</title>
+<meta name="description" content="Six steps through one Boolean or optional field: a few declared words change the question a person answers, and you can answer it on a live phone drawing.">
+<style>
+/* Layout: thesis on top, one sentence per step, then the declaration (left) beside a usable phone region (right), with the value the App receives below the phone. */
+/* signal-tokens: the one Signal token set; interactive pages carry this exact block. */
+:root {
+  --bg: #f5f8f7; --surface: #ffffff; --wash: #ecf2ef; --code-bg: #f1f5f3;
+  --ink: #14201d; --muted: #4b5f5a; --line: #d3ded9; --line-strong: #a9bab4;
+  --brand: #0b6b5c; --brand-strong: #07574a; --on-brand: #ffffff; --brand-tint: #e1f1ec;
+  --app: #6639c9; --on-app: #ffffff; --app-tint: #efe9fc;
+  --data: #d98a00; --data-ink: #8f4f00; --on-data: #1c1300; --data-tint: #fff1d9;
+  --frame: #1a2623; --screen: #ffffff; --shadow: 0 1px 2px #14201d0f, 0 8px 24px #14201d0d;
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --step--1: .875rem; --step-0: 1rem; --step-1: 1.25rem; --step-2: 1.5625rem; --step-3: 1.953rem; --step-4: 2.441rem; --step-5: 3.052rem;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1412; --surface: #131d1a; --wash: #192521; --code-bg: #0f1816;
+    --ink: #e3ece8; --muted: #9eb2ac; --line: #263430; --line-strong: #3d504a;
+    --brand: #4cc6ae; --brand-strong: #7ad8c5; --on-brand: #05201a; --brand-tint: #11302a;
+    --app: #b8a0ff; --on-app: #160e2c; --app-tint: #231d3b;
+    --data: #ffb444; --data-ink: #ffc56e; --on-data: #1c1300; --data-tint: #30240e;
+    --frame: #030706; --screen: #101917; --shadow: 0 1px 2px #0006, 0 8px 24px #0004;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1412; --surface: #131d1a; --wash: #192521; --code-bg: #0f1816;
+  --ink: #e3ece8; --muted: #9eb2ac; --line: #263430; --line-strong: #3d504a;
+  --brand: #4cc6ae; --brand-strong: #7ad8c5; --on-brand: #05201a; --brand-tint: #11302a;
+  --app: #b8a0ff; --on-app: #160e2c; --app-tint: #231d3b;
+  --data: #ffb444; --data-ink: #ffc56e; --on-data: #1c1300; --data-tint: #30240e;
+  --frame: #030706; --screen: #101917; --shadow: 0 1px 2px #0006, 0 8px 24px #0004;
+  color-scheme: dark;
+}
+/* signal-tokens:end */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font); }
+a { color: var(--brand); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 40px; display: grid; gap: 16px; }
+.back { font-size: .85rem; font-weight: 600; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+h1 { margin: 0; font-weight: 800; font-size: clamp(1.6rem, 3.4vw, 2.3rem); letter-spacing: -0.01em; text-wrap: balance; }
+.thesis { margin: 20px 0 4px; max-width: 900px; display: grid; grid-template-columns: auto minmax(140px, 320px) auto; justify-content: start; align-items: center; column-gap: clamp(12px, 2vw, 24px); font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; }
+.thesis .term { font-size: clamp(var(--step-1), 1rem + 1.4vw, var(--step-3)); font-style: italic; line-height: 1.2; text-wrap: balance; }
+.thesis .t-app { color: var(--app); } .thesis .t-human { color: var(--brand); }
+.thesis .bridge { display: grid; justify-items: center; gap: 4px; color: var(--muted); }
+.thesis svg { width: 100%; height: auto; display: block; }
+.thesis svg * { vector-effect: non-scaling-stroke; }
+.thesis .via { font-style: italic; font-size: clamp(var(--step--1), .8rem + .4vw, var(--step-1)); line-height: 1.3; text-align: center; text-wrap: balance; }
+@media (max-width: 560px) {
+  .thesis { grid-template-columns: minmax(0, 1fr); justify-items: start; row-gap: 6px; }
+  .thesis .bridge { width: min(100%, 260px); }
+}
+.say { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; font-size: 1.05rem; font-weight: 600; min-height: 3.4em; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px 12px; align-items: center; }
+#say { display: grid; flex: 1; min-width: 0; }
+#say > span { grid-area: 1 / 1; visibility: hidden; align-self: center; }
+#say > span.on { visibility: visible; }
+.say .num { font: 800 .9rem var(--font); color: var(--on-brand); background: var(--brand); border-radius: 999px; min-width: 2em; height: 2em; display: grid; place-items: center; flex: none; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+@media (max-width: 820px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.col { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.col h2 { margin: 0; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--hl); }
+.col .who { font-size: .82rem; color: var(--muted); margin-top: -6px; }
+.try-me { align-self: flex-start; margin-top: -4px; padding: 6px 14px; border-radius: 999px; font: 800 1.05rem var(--font); background: var(--data); color: var(--on-data); box-shadow: 0 0 0 0 color-mix(in srgb, var(--data) 55%, transparent); animation: beckon 2.4s ease-out infinite; }
+@keyframes beckon { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--data) 55%, transparent); } 70%, 100% { box-shadow: 0 0 0 10px transparent; } }
+.c-app { --hl: var(--app); } .c-client { --hl: var(--brand); }
+.step-title { margin: 4px 0 -4px; font-weight: 800; font-size: var(--step-2); line-height: 1.25; text-wrap: balance; }
+pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 0; font: 13px/1.6 var(--mono); overflow-x: auto; flex: 1; }
+pre:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.ln { display: block; padding: 0 12px; white-space: pre; }
+.ln.new { background: var(--data-tint); box-shadow: inset 3px 0 0 var(--data); }
+.ln.new.play { animation: grow .7s ease-out both; }
+@keyframes grow { from { opacity: 0; transform: translateX(-8px); background: color-mix(in srgb, var(--data) 35%, transparent); } }
+.cm { color: var(--muted); } .kw { color: var(--app); font-weight: 500; } .ty { color: var(--brand); } .at { color: var(--data-ink); }
+.diff { font-size: .8rem; color: var(--muted); margin: 0; }
+.diff b { color: var(--data-ink); }
+
+/* phone */
+.phone { align-self: center; width: 100%; max-width: 360px; background: var(--frame); border-radius: 30px; padding: 12px; }
+.screen { background: var(--bg); border-radius: 20px; padding: 14px 12px 12px; min-height: 300px; display: flex; flex-direction: column; gap: 12px; }
+.tag { font: 700 .66rem var(--font); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.surface { background: var(--screen); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.surface.morph { animation: morph .45s ease-out both; }
+@keyframes morph { from { opacity: 0; transform: scale(.96); } }
+.q { font-weight: 650; font-size: 1.05rem; line-height: 1.35; margin: 0; }
+.row { display: flex; align-items: center; gap: 16px; }
+.row.beside { justify-content: space-between; flex-wrap: nowrap; }
+.row.beside .q { flex: 0 1 auto; }
+.row:not(.beside) { flex-direction: column; align-items: stretch; gap: 8px; }
+.choices { display: flex; gap: 0 16px; }
+.choices.vertical { flex-direction: column; }
+.choice { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--ink); font: 1rem var(--font); cursor: pointer; text-align: left; white-space: nowrap; }
+.choices.vertical .choice { white-space: normal; }
+.choice::before { content: ""; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--muted); flex: none; box-sizing: border-box; }
+.choice[aria-checked="true"]::before { border-color: var(--brand); background: radial-gradient(circle, var(--brand) 0 4px, transparent 4.5px); }
+.choice:focus-visible, .switch:focus-visible, .date:focus-visible, .next:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
+.switch { flex: none; width: 52px; height: 32px; border-radius: 16px; border: 2px solid var(--muted); background: color-mix(in srgb, var(--muted) 18%, transparent); position: relative; cursor: pointer; padding: 0; }
+.switch::after { content: ""; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: left .2s; }
+.switch[aria-checked="true"] { background: var(--brand); border-color: var(--brand); }
+.switch[aria-checked="true"]::after { left: 24px; background: var(--on-brand); }
+.date { width: 100%; display: flex; justify-content: space-between; align-items: center; min-height: 48px; border: 1px solid var(--muted); border-radius: 8px; padding: 8px 12px; margin-top: 4px; background: var(--screen); color: var(--ink); font: 1rem var(--font); cursor: pointer; text-align: left; }
+.date.empty span { font-style: italic; color: var(--muted); }
+.date-input { width: 100%; min-height: 48px; margin-top: 4px; font: 1rem var(--font); padding: 8px 12px; border: 1px solid var(--brand); border-radius: 8px; background: var(--screen); color: var(--ink); }
+.payload { margin: 0 0 8px 9px; padding-left: 17px; border-left: 2px solid var(--line-strong); display: grid; gap: 4px; }
+.q.sub { font-size: .95rem; font-weight: 600; }
+.num-input { width: 100%; min-height: 48px; font: 1rem var(--font); padding: 8px 12px; border: 1px solid var(--muted); border-radius: 8px; background: var(--screen); color: var(--ink); }
+.num-input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.next { border: 0; border-radius: 12px; padding: 11px; font: 800 .95rem var(--font); background: var(--brand); color: var(--on-brand); }
+.next[aria-disabled="true"] { opacity: .35; }
+.value { border: 1.5px solid var(--brand); background: var(--brand-tint); border-radius: 10px; padding: 8px 12px; font: 13px/1.5 var(--mono); }
+.value .lbl { display: block; font: 800 .7rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.value.blocked { border-color: var(--data); background: var(--data-tint); }
+.cap { font-size: .76rem; color: var(--muted); margin: 0; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; }
+@media (max-width: 820px) { .say .bar { grid-column: 1 / -1; justify-content: flex-start; } }
+.btn { font: 800 .9rem var(--font); border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 12px; padding: 8px 14px; cursor: pointer; }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.btn:focus-visible, .dot:focus-visible, .back:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.dots { display: flex; gap: 6px; flex-wrap: wrap; }
+.dot { width: 30px; height: 8px; border-radius: 4px; border: 0; padding: 0; background: var(--line); cursor: pointer; }
+.dot.done { background: color-mix(in srgb, var(--brand) 40%, var(--line)); }
+.dot.now { background: var(--brand); }
+.foot { font-size: .8rem; color: var(--muted); margin: 0; }
+.nojs { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="main">
+  <a class="back" href="../../examples/default-and-nullable.html">← The seven examples, to read</a>
+  <header>
+    <h1>Simple Data. Rich Semantics. Adaptive Interaction.</h1>
+    <figure class="thesis" role="img" aria-label="Libertas bridges computational simplicity and the richness of human cognition through declarative interaction semantics.">
+      <span class="term t-app">Declaration + comments</span>
+      <span class="bridge">
+        <svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M2 14 H118" /><path d="M2 34 H118" stroke-width="1" stroke-dasharray="2 4" />
+          <path d="M14 14 V34 M106 14 V34" /><path d="M14 34 Q60 -6 106 34" />
+          <path d="M37 14 V22 M48 14 V16 M60 14 V15 M72 14 V16 M83 14 V22" stroke-width="1" />
+        </svg>
+        <span class="via">declarative interaction semantics</span>
+      </span>
+      <span class="term t-human">Human cognition</span>
+    </figure>
+  </header>
+
+  <noscript><p class="nojs">This page needs JavaScript. The <a href="../../examples/default-and-nullable.html">seven examples</a> show the same declarations and phone regions without it.</p></noscript>
+
+  <h2 class="step-title" id="ex-title"></h2>
+
+  <div class="say">
+    <span class="num" id="num">1</span><span id="say" aria-live="polite"></span>
+    <div class="bar">
+      <button class="btn" id="first" type="button" aria-label="Start over" title="Start over">⏮</button>
+      <button class="btn primary" id="play" type="button">▶ Play</button>
+      <button class="btn" id="prev" type="button" aria-label="Previous step" title="Previous step">‹</button>
+      <button class="btn" id="next" type="button" aria-label="Next step" title="Next step">›</button>
+      <div class="dots" id="dots" role="group" aria-label="Steps"></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <section class="col c-app">
+      <h2>The declaration</h2>
+      <div class="who">One field of an App's Rust type</div>
+      <pre id="code" tabindex="0" aria-label="The field declaration for this step"></pre>
+      <p class="diff" id="diff"></p>
+    </section>
+    <section class="col c-client">
+      <h2>What the person sees</h2>
+      <div class="try-me">Try me!</div>
+      <div class="phone">
+        <div class="screen">
+          <span class="tag">Conceptual drawing of a phone region</span>
+          <div class="surface" id="surface"></div>
+          <button class="next" id="next-btn" type="button">Next</button>
+        </div>
+      </div>
+      <div class="value" id="value" aria-live="polite"></div>
+      <p class="cap">Not a product screenshot. Each client draws the same controls in its own native style.</p>
+    </section>
+  </div>
+
+  <p class="foot">Keyboard: ← and → change steps, Space plays or pauses, Home starts over. Each step starts as a fresh editor with no value supplied by the App.</p>
+</main>
+
+<script>
+(() => {
+  // ---- The seven examples. Each line is plain text; highlighting is applied when drawn.
+  const STEPS = [
+    { title: "Required decision", field: "accept_invitation",
+      code: ["/// Accept invitation", "/// Choose whether to accept the invitation.", "pub accept_invitation: bool,"],
+      q: "Accept invitation", kind: "bool", labels: ["Yes", "No"], init: undefined,
+      say: "No Default: Yes and No both start unselected. Next stays blocked until the person answers, so nothing is quietly saved as false." },
+    { title: "Answers in the person's words", field: "accept_invitation",
+      code: ["/// Accept invitation", "/// [TrueText]", "/// I accept", "/// [FalseText]", "/// I decline", "pub accept_invitation: bool,"],
+      q: "Accept invitation", kind: "bool", labels: ["I accept", "I decline"], init: undefined,
+      say: "Two answer texts turn Yes and No into “I accept” and “I decline”. The App still receives true or false, and an answer is still required." },
+    { title: "A preset preference", field: "receive_reminders",
+      code: ["/// Receive reminders", "#[libertas_default(false)]", "pub receive_reminders: bool,"],
+      q: "Receive reminders", kind: "switch", init: false,
+      say: "A Default and no answer texts: the client draws a switch that starts off. The value is false from the start, and one tap changes it." },
+    { title: "A preset answer in the person's words", field: "receive_reminders",
+      code: ["/// Receive reminders", "/// [TrueText]", "/// Send me reminders", "/// [FalseText]", "/// Do not send reminders", "#[libertas_default(false)]", "pub receive_reminders: bool,"],
+      q: "Receive reminders", kind: "bool", labels: ["Send me reminders", "Do not send reminders"], init: false,
+      say: "Add answer texts to the Default, and the switch becomes two worded answers with “Do not send reminders” already selected." },
+    { title: "Three answers", field: "student_status",
+      code: ["/// Student status", "/// [TrueText]", "/// Yes, I am a student", "/// [FalseText]", "/// No, I am not a student", "/// [NullText]", "/// Prefer not to tell", "pub student_status: Option<bool>,"],
+      q: "Student status", kind: "nullbool", labels: ["Yes, I am a student", "No, I am not a student", "Prefer not to tell"], init: undefined,
+      say: "An optional Boolean with three answer texts: none starts selected. “Prefer not to tell” is a real answer, None; only no answer blocks Next." },
+    { title: "Null as a complete answer", field: "death_date",
+      code: ["/// Date of death in 2026", "/// [NullText]", "/// Alive at the end of 2026", "/// [SetText]", "/// Died in 2026 on", "#[libertas_date_only]", "#[libertas_number(min = 20260101, max = 20261231)]", "#[libertas_default($null)]", "pub death_date: Option<u32>,"],
+      q: "Date of death in 2026", kind: "date", labels: ["Alive at the end of 2026", "Died in 2026 on"], init: null,
+      say: "An optional date with two answer texts: “Alive at the end of 2026” starts selected. “Died in 2026 on” opens a date editor, and a blank date blocks Next." },
+    { title: "Answers that bring their own questions", field: "reply",
+      code: ["/// Reply to the invitation", "#[libertas_inline_choices]", "pub reply: Reply,", "", "pub enum Reply {",
+        "    /// I will attend", "    Attending {", "        /// Guests besides me", "        #[libertas_number(min = 0, max = 3)]", "        guests: u32,", "    },",
+        "    /// Not sure yet", "    Tentative {", "        /// I will confirm by", "        #[libertas_date_only]", "        #[libertas_number(min = 20261101, max = 20261130)]", "        confirm_by: u32,", "    },",
+        "    /// I cannot attend", "    Declined,", "}"],
+      q: "Reply to the invitation", kind: "union", labels: ["I will attend", "Not sure yet", "I cannot attend"], variants: ["Attending", "Tentative", "Declined"], init: undefined,
+      say: "A Union: each answer brings exactly the questions it needs. Choose “I will attend” and the guest count appears; switch to “I cannot attend” and it is gone, from the screen and from the value. No show/hide code, no stale data, nothing to forget." },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let i = 0, playing = false, timer = null, answer, dateMode = false;
+
+  // ---- Inline-choice ladder (presentation.md, inline-choice ladder): beside the title, one line below, or one per line,
+  // measured from this drawing's text, radio glyph and gaps.
+  const GAP = 16, GLYPH = 20 + 8;
+  const ctx = document.createElement("canvas").getContext("2d");
+  const family = getComputedStyle(document.documentElement).getPropertyValue("--font").trim();
+  function text(t, weight, px) { ctx.font = `${weight} ${px}px ${family}`; return { natural: ctx.measureText(t).width, longestWord: Math.max(...t.split(/\s+/).map((w) => ctx.measureText(w).width)) }; }
+  function rung(rowDp, title, labels) {
+    const line = labels.reduce((sum, l) => sum + text(l, 400, 16).natural + GLYPH, 0) + GAP * (labels.length - 1);
+    const t = text(title, 650, 16.8);
+    const readable = Math.min(t.natural, Math.max(t.longestWord, 0.4 * rowDp));
+    if (readable + GAP + line <= rowDp) return "beside";
+    return line <= rowDp ? "below" : "vertical";
+  }
+
+  function highlight(line) {
+    const pad = line.match(/^ */)[0], esc = line.slice(pad.length).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    if (!esc) return " ";
+    if (esc.startsWith("///")) return `${pad}<span class="cm">${esc}</span>`;
+    if (esc.startsWith("#[")) return `${pad}<span class="at">${esc}</span>`;
+    return pad + esc.replace(/^pub (enum )?/, '<span class="kw">pub $1</span>').replace(/: (bool|u32|Reply|Option&lt;u32&gt;|Option&lt;bool&gt;),$/, ': <span class="ty">$1</span>,');
+  }
+  function drawCode(animate) {
+    const s = STEPS[i], before = i > 0 ? new Set(STEPS[i - 1].code) : new Set(s.code);
+    const fresh = s.code.filter((l) => !before.has(l));
+    $("code").innerHTML = s.code.map((l) => `<span class="ln ${before.has(l) ? "" : "new"} ${!before.has(l) && animate && !reduce ? "play" : ""}">${highlight(l)}</span>`).join("");
+    $("diff").innerHTML = i === 0 ? "The starting point: a plain Boolean field."
+      : fresh.length && s.field === STEPS[i - 1].field ? `Changed from the previous step: <b>${fresh.length} line${fresh.length > 1 ? "s" : ""}</b> added.`
+      : `A new field; the highlighted lines are what differs from the previous step.`;
+    $("ex-title").textContent = s.title;
+  }
+
+  // ---- The value the App receives, in Rust terms; undefined is the editor's unanswered state, never encoded.
+  function valueText(s, a) {
+    if (a === undefined) return null;
+    if (s.kind === "date") return a === null ? "None" : a === "" ? null : `Some(${a})`;
+    if (s.kind === "nullbool") return a === null ? "None" : `Some(${a})`;
+    if (s.kind === "union") {
+      if (a.v === "Attending") return Number.isInteger(a.guests) && a.guests >= 0 && a.guests <= 3 ? `Attending { guests: ${a.guests} }` : null;
+      if (a.v === "Tentative") return a.date ? `Tentative { confirm_by: ${a.date} }` : null;
+      return a.v;
+    }
+    return String(a);
+  }
+  function drawValue() {
+    const s = STEPS[i], v = valueText(s, answer), box = $("value");
+    box.classList.toggle("blocked", v === null);
+    box.innerHTML = `<span class="lbl">The App receives on Next</span>` + (v !== null ? `${s.field}: ${v}` : answer?.guests !== undefined && answer?.v === "Attending" ? "guests must be a whole number from 0 to 3 — Next blocked" : "not yet answered — Next blocked");
+    const btn = $("next-btn");
+    btn.setAttribute("aria-disabled", String(v === null));
+    btn.title = v === null ? "Answer first: Next is blocked" : "Next would send this value";
+  }
+
+  function drawSurface(animate) {
+    const s = STEPS[i], surface = $("surface");
+    const rowDp = Math.max(0, surface.clientWidth - 32);
+    let html;
+    if (s.kind === "switch") {
+      html = `<div class="row beside"><p class="q" id="q">${s.q}</p><button class="switch" type="button" role="switch" aria-labelledby="q" aria-checked="${answer === true}"></button></div>`;
+    } else {
+      // Boolean: true, false (and null for Option<bool>). Optional date: NullText first, SetText second.
+      const values = s.kind === "date" ? [null, "date"] : s.kind === "nullbool" ? [true, false, null] : s.kind === "union" ? s.variants : [true, false];
+      const selected = (v) => s.kind === "date" ? (v === null ? answer === null : answer !== undefined && answer !== null) : s.kind === "union" ? answer?.v === v : answer === v;
+      // A Union with a data-carrying branch always stands one per line, so each payload has a place under its choice.
+      const r = s.kind === "union" ? "vertical" : rung(rowDp, s.q, s.labels);
+      // A Union's selected payload sits directly below its chosen answer; another choice replaces it.
+      const payload = s.kind !== "union" ? "" : answer?.v === "Attending"
+        ? `<div class="payload"><label class="q sub" for="guests-input">Guests besides me</label><input class="num-input" id="guests-input" type="number" inputmode="numeric" min="0" max="3" step="1" placeholder="0 to 3" value="${answer.guests ?? ""}"></div>`
+        : answer?.v === "Tentative" ? `<div class="payload"><p class="q sub">I will confirm by</p>${dateEditor(answer.date, "2026-11-01", "2026-11-30", "I will confirm by")}</div>` : "";
+      html = `<div class="row ${r === "beside" ? "beside" : ""}"><p class="q" id="q">${s.q}</p><div class="choices ${r === "vertical" ? "vertical" : ""}" role="radiogroup" aria-labelledby="q">${
+        s.labels.map((l, k) => `<button class="choice" type="button" role="radio" data-k="${k}" aria-checked="${selected(values[k])}" tabindex="${selected(values[k]) || (answer === undefined && k === 0) ? 0 : -1}">${l}</button>${selected(values[k]) ? payload : ""}`).join("")}</div></div>`;
+      if (s.kind === "date" && answer !== null && answer !== undefined) html += dateEditor(answer, "2026-01-01", "2026-12-31", "Date of death in 2026");
+      surface.dataset.values = JSON.stringify(values);
+    }
+    surface.innerHTML = html;
+    surface.classList.remove("morph");
+    if (animate && !reduce) { void surface.offsetWidth; surface.classList.add("morph"); }
+    const di = $("date-input");
+    if (di) { di.focus(); di.addEventListener("change", () => { if (di.value) { const n = Number(di.value.replace(/-/g, "")); if (s.kind === "union") answer.date = n; else answer = n; } dateMode = false; drawSurface(false); drawValue(); $("date-btn")?.focus(); }); }
+    // A blank or out-of-range count is not an answer; the input keeps focus while the value box follows.
+    $("guests-input")?.addEventListener("input", (e) => { answer.guests = e.target.value === "" ? undefined : Number(e.target.value); drawValue(); });
+    drawValue();
+  }
+  function dateEditor(value, min, max, label) {
+    return dateMode ? `<input class="date-input" id="date-input" type="date" min="${min}" max="${max}" aria-label="${label}">`
+      : `<button class="date ${value ? "" : "empty"}" id="date-btn" type="button"><span>${value ? fmt(value) : "Choose date…"}</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 11h18"/></svg></button>`;
+  }
+  const fmt = (n) => new Date(Math.floor(n / 10000), Math.floor(n / 100) % 100 - 1, n % 100).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  $("surface").addEventListener("click", (e) => {
+    const s = STEPS[i];
+    const sw = e.target.closest(".switch");
+    if (sw) { answer = !answer; drawSurface(false); $("surface").querySelector(".switch").focus(); return; }
+    if (e.target.closest("#date-btn")) { dateMode = true; drawSurface(false); return; }
+    const c = e.target.closest(".choice");
+    if (!c) return;
+    const v = JSON.parse($("surface").dataset.values)[Number(c.dataset.k)];
+    if (s.kind === "date") { if (v === null) answer = null; else if (answer === null || answer === undefined) answer = ""; }
+    else if (s.kind === "union") { if (answer?.v !== v) answer = v === "Attending" ? { v, guests: undefined } : v === "Tentative" ? { v, date: "" } : { v }; }
+    else answer = v;
+    dateMode = false;
+    drawSurface(false);
+    $("surface").querySelector(`.choice[data-k="${c.dataset.k}"]`)?.focus();
+  });
+  // Arrow keys move within a radio group, as native radio groups do.
+  $("surface").addEventListener("keydown", (e) => {
+    const c = e.target.closest(".choice");
+    if (!c || !["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(e.key)) return;
+    e.preventDefault(); e.stopPropagation();
+    const all = [...$("surface").querySelectorAll(".choice")], k = all.indexOf(c);
+    all[(k + (e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : all.length - 1)) % all.length].click();
+  });
+  // The phone's Next submits the answer: blocked while unanswered, otherwise it sends the value and moves on.
+  let sending = false;
+  $("next-btn").addEventListener("click", () => {
+    if (sending) return;
+    const s = STEPS[i], v = valueText(s, answer), box = $("value");
+    if (v === null) {
+      box.animate?.([{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(0)" }], { duration: reduce ? 0 : 280 });
+      return;
+    }
+    box.innerHTML = `<span class="lbl">Sent to the App</span>${s.field}: ${v} ✓`;
+    box.animate?.([{ transform: "scale(1.04)" }, { transform: "none" }], { duration: reduce ? 0 : 250 });
+    if (i >= STEPS.length - 1) return;
+    stop(); sending = true;
+    setTimeout(() => { sending = false; i += 1; render(true); }, reduce ? 0 : 700);
+  });
+
+  function render(animate) {
+    const s = STEPS[i];
+    $("num").textContent = String(i + 1);
+    const sayBox = $("say");
+    if (sayBox.childElementCount !== STEPS.length) {
+      sayBox.innerHTML = "";
+      STEPS.forEach((st) => { const t = document.createElement("span"); t.textContent = st.say; sayBox.appendChild(t); });
+    }
+    [...sayBox.children].forEach((t, k) => { t.classList.toggle("on", k === i); t.setAttribute("aria-hidden", String(k !== i)); });
+    answer = s.init; dateMode = false;
+    drawCode(animate);
+    drawSurface(animate);
+    const dots = $("dots"); dots.innerHTML = "";
+    STEPS.forEach((st, k) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "dot" + (k < i ? " done" : "") + (k === i ? " now" : "");
+      b.setAttribute("aria-label", `Step ${k + 1} of ${STEPS.length}: ${st.title}`); if (k === i) b.setAttribute("aria-current", "step");
+      b.addEventListener("click", () => { stop(); i = k; render(true); });
+      dots.appendChild(b);
+    });
+  }
+  function stop() { playing = false; clearTimeout(timer); $("play").textContent = "▶ Play"; }
+  function tick() { if (!playing) return; if (i >= STEPS.length - 1) { stop(); return; } i++; render(true); timer = setTimeout(tick, 5200); }
+  $("play").addEventListener("click", () => {
+    if (playing) { stop(); return; }
+    if (i >= STEPS.length - 1) { i = 0; render(false); }
+    playing = true; $("play").textContent = "❚❚ Pause"; timer = setTimeout(tick, 2500);
+  });
+  $("first").addEventListener("click", () => { stop(); i = 0; render(false); });
+  $("prev").addEventListener("click", () => { stop(); i = Math.max(0, i - 1); render(true); });
+  $("next").addEventListener("click", () => { stop(); i = Math.min(STEPS.length - 1, i + 1); render(true); });
+  document.addEventListener("keydown", (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (e.target.closest && e.target.closest("input, textarea, select")) return;
+    if (e.key === " " && e.target.closest && e.target.closest("button, a")) return;
+    if (e.key === "ArrowRight") $("next").click();
+    else if (e.key === "ArrowLeft") $("prev").click();
+    else if (e.key === " ") { e.preventDefault(); $("play").click(); }
+    else if (e.key === "Home") { e.preventDefault(); $("first").click(); }
+  });
+  // The ladder is measured against the row's width, so decide again when the phone region resizes.
+  let lastW = 0;
+  new ResizeObserver(() => { const w = $("surface").clientWidth; if (Math.abs(w - lastW) > 1) { lastW = w; if (!$("date-input") && document.activeElement?.id !== "guests-input") drawSurface(false); } }).observe($("surface"));
+  render(false);
+})();
+</script>
+</body>
+</html>
